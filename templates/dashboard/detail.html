@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "dashboard/base.html" %}
 
 {% block content %}
 <main role="main">
@@ -7,13 +7,9 @@
       <div style="padding: 0 15px">
       <nav>
         <ol class="breadcrumb">
-          {% if owner %}
-            <li class="breadcrumb-item"><a href="{{ url_for('profile', username=owner) }}">{{ owner }}</a></li>
-          {% else %}
-            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-          {% endif %}
-          <li class="breadcrumb-item"><a href="{{ table_url }}">{{ table_name }}</a></li>
-          <li class="breadcrumb-item active">{{ item.uuid }}</li>
+          <li class="breadcrumb-item"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
+          <li class="breadcrumb-item"><a href="{{ url_for('dashboard:table', tablename=tablename) }}">{{ title }}</a></li>
+          <li class="breadcrumb-item active">{{ item[lookup_field] }}</li>
         </ol>
       </nav>
       </div>

@@ -1,24 +1,20 @@
+from starlette.exceptions import HTTPException
 from starlette.routing import Router, Route
 from starlette.templating import Jinja2Templates
-import typesystem
 import math
 from . import ordering, pagination, search
 from .datasource import Datasource
 
 
-class User(typesystem.Schema):
-    username = typesystem.String(title="Username", max_length=100)
-    is_admin = typesystem.Boolean(title="Is Admin")
-    joined = typesystem.DateTime(title="Joined")
-
-
 class Dashboard:
     PAGE_SIZE = 10
+    LOOKUP_FIELD = 'pk'
 
     def __init__(self):
         self.routes = [
             Route('/', endpoint=self.index, name='index'),
             Route('/{tablename}', endpoint=self.table, name='table'),
+            Route('/{tablename}/{ident}', endpoint=self.detail, name='detail'),
         ]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory='templates')
@@ -41,10 +37,9 @@ class Dashboard:
 
     async def table(self, request):
         template = "dashboard/table.html"
-        schema = User
-
-        columns = {key: field.title for key, field in schema.fields.items()}
         datasource = Datasource()
+
+        columns = {key: field.title for key, field in datasource.schema.fields.items()}
 
         # Get some normalised information from URL query parameters
         current_page = pagination.get_page_number(url=request.url)
@@ -62,7 +57,7 @@ class Dashboard:
 
         # Perform column ordering
         if order_column is not None:
-            datasource = datasource.order_by(column=order_column, reverse=is_reverse)
+            datasource = datasource.order_by(order_by=order_column, reverse=is_reverse)
 
         #  Perform pagination
         datasource = datasource.offset(offset).limit(self.PAGE_SIZE)
@@ -85,13 +80,46 @@ class Dashboard:
 
         context = {
             "request": request,
-            "schema": schema,
+            "schema": datasource.schema,
+            "title": datasource.title,
             "form_errors": {},
             "form_values": {},
             "tablename": request.path_params["tablename"],
             "rows": rows,
             "column_controls": column_controls,
             "page_controls": page_controls,
-            "view_style": view_style
+            "view_style": view_style,
+            "lookup_field": self.LOOKUP_FIELD
+        }
+        return self.templates.TemplateResponse(template, context)
+
+    async def detail(self, request):
+        template = "dashboard/detail.html"
+        datasource = Datasource()
+
+        tablename = request.path_params["tablename"]
+        ident = request.path_params["ident"]
+
+        ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
+        lookup = {self.LOOKUP_FIELD: ident}
+        item = await datasource.get(**lookup)
+        if item is None:
+            raise HTTPException(status_code=404)
+
+        view_style = request.query_params.get("view")
+        if view_style not in ("json", "table"):
+            view_style = "table"
+
+        # Render the page
+        context = {
+            "request": request,
+            "schema": datasource.schema,
+            "title": datasource.title,
+            "tablename": tablename,
+            "item": item,
+            "form_values": {},
+            "form_errors": {},
+            "view_style": view_style,
+            "lookup_field": self.LOOKUP_FIELD
         }
         return self.templates.TemplateResponse(template, context)
