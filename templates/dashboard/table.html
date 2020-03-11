@@ -1,0 +1,192 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<main role="main">
+  <div class="container">
+    <div class="row pt-3">
+      <div style="padding: 0 15px">
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
+          <li class="breadcrumb-item active">{{ tablename }}</li>
+        </ol>
+      </nav>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        {% if rows %}
+          <form class="form-inline" target=".">
+          <div class="input-group mb-3" style="width: 100%">
+            <input name="search" {% if search_term %}value="{{ search_term }}"{% endif %} type="search" class="form-control" aria-label="Search" aria-describedby="button-search">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="submit" id="button-search">Search</button>
+            </div>
+          </div>
+          </form>
+          {% endif %}
+      </div>
+      <div class="col-md-6" style="height: 54px">
+        {% if can_edit %}
+          <div style="float: right">
+          <a class="btn btn-outline-secondary" id="buttonEditColumns" href="{{ url_for('columns', username=owner, table_id=table_id) }}"><span class="oi oi-pencil" title="icon name" aria-hidden="true"></span> Edit Columns</a>
+          <button class="btn btn-outline-primary" type="button" id="buttonNewRow" data-toggle="modal" data-target="#newRowModal"><span class="oi oi-plus" title="icon name" aria-hidden="true"></span> New Row</button>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    {% if rows %}
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="dropdown" style="float: right; padding-bottom: 3px; border-left: 0; border-bottom: 1px solid #dee2e6">
+          <button class="btn btn-link dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Export
+          </button>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="{{ request.url.include_query_params(export='json') }}">Export JSON</a>
+            <a class="dropdown-item" href="{{ request.url.include_query_params(export='csv') }}">Export CSV</a>
+          </div>
+        </div>
+
+        <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a {% if view_style == 'table' %}class="nav-link active"{% else %}class="nav-link" href="{{ request.url.remove_query_params('view') }}"{% endif %}>Table</a>
+        </li>
+        <li class="nav-item">
+          <a {% if view_style == 'json' %}class="nav-link active"{% else %}class="nav-link" href="{{ request.url.include_query_params(view='json') }}"{% endif %}>JSON</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          {% if view_style == "table" %}
+          <table class="table dataset-list">
+            <thead>
+              <tr>
+                {% for control in column_controls %}
+                <th scope="col" {% if control.is_reverse_sorted %}class="dropup"{% endif %}>
+                  {% if control.url %}
+                    <a {% if control.is_sorted %}class="dropdown-toggle"{% endif %} href="{{ control.url }}">
+                  {% endif %}
+                  {{ control.text }}
+                  {% if control.url %}
+                    </a>
+                  {% endif %}
+                </th>
+                {% endfor %}
+                <th style="width: 20px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in rows %}
+              <tr>
+                {% for key in schema.fields.keys() %}
+                  <td>{{ item[key] }}</td>
+                {% endfor %}
+                <td><a href="{{ item.url }}" class="oi oi-chevron-right" title="icon name" aria-hidden="true"></a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <pre style="padding: 20px; font-size: 12px">{{ json_data }}</pre>
+          {% endif %}
+        </div>
+      </div>
+      <div class="row">
+        {% if page_controls %}
+        <div class="col">
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              {% for control in page_controls %}
+              <li class="page-item {% if control.is_disabled %}disabled{% endif %} {% if control.is_active %}active{% endif %}"><a class="page-link" {% if control.url %}href="{{ control.url }}"{% endif %}>{{ control.text }}</a></li>
+              {% endfor %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+      </div>
+    {% elif not table_has_columns %}
+      <div class="row pt-3">
+        <div class="col-md-12">
+          <div class="alert alert-warning" role="alert" style="text-align: center; padding: 30px;">
+          <p><em>This table does not have any columns defined yet.</em></p>
+          {% if can_edit %}<p><em>Upload a CSV file, or edit the columns and start adding data.</em></p>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% elif not table_has_rows %}
+        <div class="row pt-3">
+          <div class="col-md-12">
+            <div class="alert alert-warning" role="alert" style="text-align: center; padding: 30px;">
+            <em>This table does not have any data yet.</em>
+            </div>
+          </div>
+        </div>
+    {% endif %}
+
+    {% if not table_has_columns and can_edit %}
+    <form id="uploadForm" action="{{ url_for('upload', username=owner, table_id=table_id) }}" method="POST" enctype="multipart/form-data">
+      <input id="uploadInput" name="upload-file" type="file" class="file">
+    </form>
+    {% endif %}
+  </div>
+</main>
+
+<div class="modal fade" id="newRowModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New Row</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="{{ request.url }}" method="POST">
+        <div class="modal-body">
+          {% for key, field in schema.fields.items() %}
+          <div class="form-group row">
+            <label class="col-sm-3 col-form-label">{{ field.title }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="{{ key }}" class="form-control {% if form_errors[key] %}is-invalid{% endif %}" value="{{ form_values[key] }}">
+               {% if form_errors[key] %}<div class="invalid-feedback">{{ form_errors[key] }}</div>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-outline-primary"><span class="oi oi-check" title="icon name" aria-hidden="true"></span> Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block tail %}
+<script type="text/javascript">
+$("#uploadInput").fileinput({
+    msgPlaceholder: "Select a CSV file...",
+    showUpload: false, // hide upload button
+    showRemove: false, // hide remove button
+    showClose: false, // hide 'x' control
+    browseOnZoneClick: true,
+    overwriteInitial: true, // append files to initial preview
+    initialPreviewAsData: true,
+}).on("filebatchselected", function(event, files) {
+    $("#uploadForm").submit();
+});
+</script>
+
+{% if form_errors %}
+<script type="text/javascript">
+  $('#newRowModal').removeClass('fade')
+  $('#newRowModal').modal('show');
+  $('#newRowModal').addClass('fade')
+</script>
+{% endif %}
+{% endblock %}

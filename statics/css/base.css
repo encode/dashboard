@@ -1,0 +1,16 @@
+/* Move down content because we have a fixed navbar that is 3.5rem tall */
+body {
+  padding-top: 3.5rem;
+}
+
+/* The listing table has a tab at the top. We don't want the top cells
+   to include their own border, since that visually cuts off the tab. */
+.dataset-list th {
+  border-top: 0
+}
+
+/* The details table has a tab at the top. We don't want the top cells
+   to include their own border, since that visually cuts off the tab. */
+.dataset-detail tr:first-child th, .details-table tr:first-child td {
+  border-top: 0
+}

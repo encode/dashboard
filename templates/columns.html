@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main role="main">
+  <div class="container">
+    <div class="row pt-3">
+      <nav>
+        <ol class="breadcrumb">
+          {% if owner %}
+            <li class="breadcrumb-item"><a href="{{ url_for('profile', username=owner) }}">{{ owner }}</a></li>
+          {% else %}
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          {% endif %}
+          <li class="breadcrumb-item"><a href="{{ table_url }}">{{ table_name }}</a></li>
+          <li class="breadcrumb-item active">Edit Columns</li>
+        </ol>
+      </nav>
+    </div>
+
+    {% if can_edit %}
+    <div class="row">
+      <div class="col-md-12">
+        <div style="float: right">
+        <button class="btn btn-outline-danger" type="button" id="buttonDeleteTable" data-toggle="modal" data-target="#deleteTableModal"><span class="oi oi-x" title="icon name" aria-hidden="true"></span> Delete Table</button>
+        <button class="btn btn-outline-primary" type="button" id="buttonNewColumn" data-toggle="modal" data-target="#newColumnModal"><span class="oi oi-plus" title="icon name" aria-hidden="true"></span> New Column</button>
+      </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="row pt-3">
+      <div class="col-md-12">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Identity</th>
+              <th scope="col">Data Type</th>
+              <th style="width: 20px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for column in columns %}
+            <tr>
+              <td>{{ column.name }}</td>
+              <td><code>"{{ column.identity }}"</code></td>
+              <td><code>{{ column.datatype }}</code></td>
+              {% if can_edit %}
+              <td><a href="#" class="oi oi-x" title="delete" aria-hidden="true" data-toggle="modal" data-target="#deleteColumnModal" data-column-name="{{ column.name }}" data-column-url="{{ url_for('delete-column', username=owner, table_id=table_id, column_id=column.identity) }}"></a></td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="row pt-3">
+      <div class="col-md-12">
+
+      </div>
+    </div>
+  </div>
+</main>
+
+{% if can_edit %}
+<div class="modal fade" id="newColumnModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New Column</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="{{ request.url }}" method="POST">
+        <div class="modal-body">
+          <div class="form-group row">
+            <label class="col-sm-3 col-form-label">Name</label>
+            <div class="col-sm-9">
+              <input type="text" name="name" class="form-control {% if form_errors.name %}is-invalid{% endif %}" value="{{ form_values.name }}">
+               {% if form_errors.name %}<div class="invalid-feedback">{{ form_errors.name }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-3 col-form-label">Data Type</label>
+            <div class="col-sm-9">
+              <select name="datatype" class="custom-select {% if form_errors.datatype %}is-invalid{% endif %}">
+                <option value="string" {% if form_values.datatype == 'string' %}selected{% endif %}>string</option>
+                <option value="integer" {% if form_values.datatype == 'integer' %}selected{% endif %}>integer</option>
+              </select>
+               {% if form_errors.datatype %}<div class="invalid-feedback">{{ form_errors.datatype }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-outline-primary"><span class="oi oi-check" title="icon name" aria-hidden="true"></span> Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteColumnModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Column</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure?
+      </div>
+      <div class="modal-footer">
+        <form id="columnDeleteForm" action="#" method="POST">
+          <button type="submit" class="btn btn-outline-danger"><span class="oi oi-x" title="details" aria-hidden="true"></span> Confirm Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteTableModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Table</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p><em>This action will delete the entire table.</em></p>
+        <p>Are you sure?</p>
+      </div>
+      <div class="modal-footer">
+        <form id="tableDeleteForm" action="{{ url_for('delete-table', username=owner, table_id=table_id) }}" method="POST">
+          <button type="submit" class="btn btn-outline-danger"><span class="oi oi-x" title="details" aria-hidden="true"></span> Confirm Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block tail %}
+{% if form_errors %}
+<script type="text/javascript">
+  $('#newColumnModal').removeClass('fade')
+  $('#newColumnModal').modal('show');
+  $('#newColumnModal').addClass('fade')
+</script>
+{% endif %}
+
+<script type="text/javascript">
+$('#deleteColumnModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var columnName = button.data('column-name') // Extract info from data-* attributes
+  var columnURL = button.data('column-url') // Extract info from data-* attributes
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-body').text('Are you sure you want to delete the "' + columnName + '" column?')
+  modal.find('#columnDeleteForm').attr('action', columnURL)
+})
+</script>
+{% endblock %}
