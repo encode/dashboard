@@ -18,6 +18,11 @@ class Dashboard:
         ]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory='templates')
+        self.datasources = {
+            "users": Datasource(title="Users"),
+            "migrations": Datasource(title="Migrations"),
+            "log-records": Datasource(title="Log Records")
+        }
 
     async def __call__(self, scope, receive, send) -> None:
         await self.router(scope, receive, send)
@@ -25,9 +30,11 @@ class Dashboard:
     async def index(self, request):
         template = "dashboard/index.html"
         rows = [
-            {"text": "Users", "url": request.url_for('dashboard:table', tablename='users'), "count": 5},
-            {"text": "Migrations", "url": request.url_for('dashboard:table', tablename='migrations'), "count": 20},
-            {"text": "Log Records", "url": request.url_for('dashboard:table', tablename='log-records'), "count": 2406},
+            {
+                "text": datasource.title,
+                "url": request.url_for('dashboard:table', tablename=key),
+                "count": await datasource.count(),
+            } for key, datasource in self.datasources.items()
         ]
         context = {
             "request": request,
@@ -37,7 +44,9 @@ class Dashboard:
 
     async def table(self, request):
         template = "dashboard/table.html"
-        datasource = Datasource()
+        tablename = request.path_params["tablename"]
+
+        datasource = self.datasources[tablename]
 
         columns = {key: field.title for key, field in datasource.schema.fields.items()}
 
@@ -95,10 +104,11 @@ class Dashboard:
 
     async def detail(self, request):
         template = "dashboard/detail.html"
-        datasource = Datasource()
 
         tablename = request.path_params["tablename"]
         ident = request.path_params["ident"]
+
+        datasource = self.datasources[tablename]
 
         ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}

@@ -13,7 +13,8 @@ class Datasource:
     schema = User
     title = 'Users'
 
-    def __init__(self, filter: dict = None, search_term: str='', order_by: str=None, reverse: bool=False, offset: int=None, limit: int=None):
+    def __init__(self, title: str = None, filter: dict = None, search_term: str='', order_by: str=None, reverse: bool=False, offset: int=None, limit: int=None):
+        self.title = title
         self._filter = filter
         self._search_term = search_term
         self._order_by = order_by
@@ -23,6 +24,7 @@ class Datasource:
 
     def copy(self, **kwargs):
         base_kwargs = {
+            'title': self.title,
             'filter': self._filter,
             'search_term': self._search_term,
             'order_by': self._order_by,
