@@ -9,7 +9,7 @@
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
           <li class="breadcrumb-item"><a href="{{ url_for('dashboard:table', tablename=tablename) }}">{{ title }}</a></li>
-          <li class="breadcrumb-item active">{{ item[lookup_field] }}</li>
+          <li class="breadcrumb-item active"><a href="{{ url_for('dashboard:detail', tablename=tablename, ident=item[lookup_field]) }}">{{ item[lookup_field] }}</a></li>
         </ol>
       </nav>
       </div>
@@ -29,19 +29,6 @@
 
     <div class="row pt-3">
       <div class="col-md-12">
-        <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a {% if view_style == 'table' %}class="nav-link active"{% else %}class="nav-link" href="{{ request.url.remove_query_params('view') }}"{% endif %}>Table</a>
-        </li>
-        <li class="nav-item">
-          <a {% if view_style == 'json' %}class="nav-link active"{% else %}class="nav-link" href="{{ request.url.include_query_params(view='json') }}"{% endif %}>JSON</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-    <div class="row">
-      <div class="col-md-12">
-        {% if view_style == "table" %}
           <table class="table dataset-detail">
             <tbody>
               {% for key, field in schema.fields.items() %}
@@ -51,9 +38,6 @@
               {% endfor %}
             </tbody>
           </table>
-        {% else %}
-          <pre style="padding: 20px; font-size: 12px">{{ json_data }}</pre>
-        {% endif %}
       </div>
     </div>
   </div>
@@ -72,7 +56,7 @@
         Are you sure?
       </div>
       <div class="modal-footer">
-        <form action="{{ item.delete_url }}" method="POST">
+        <form action="{{ url_for('dashboard:delete', tablename=tablename, ident=item[lookup_field]) }}" method="POST">
           <button type="submit" class="btn btn-outline-danger"><span class="oi oi-x" title="details" aria-hidden="true"></span> Confirm Delete</button>
         </form>
       </div>

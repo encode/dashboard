@@ -6,7 +6,7 @@ from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
-from datadash import Auth, Dashboard
+from datadash import Auth, Dashboard, Datasource
 import os
 
 
@@ -16,7 +16,11 @@ HTTPS_ONLY = config('HTTPS_ONLY', cast=bool, default=False)
 
 templates = Jinja2Templates(directory='templates')
 statics = StaticFiles(directory='statics')
-dashboard = Dashboard()
+dashboard = Dashboard(datasources={
+    "users": Datasource(title="Users"),
+    "migrations": Datasource(title="Migrations"),
+    "log-records": Datasource(title="Log Records")
+})
 auth = Auth()
 
 

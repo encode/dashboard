@@ -30,7 +30,7 @@ class Datasource:
             'order_by': self._order_by,
             'reverse': self._reverse,
             'offset': self._offset,
-            'limit': self._limit
+            'limit': self._limit,
         }
         base_kwargs.update(kwargs)
         return self.__class__(**base_kwargs)
@@ -51,15 +51,12 @@ class Datasource:
         return self.copy(filter=filter)
 
     async def all(self):
-        items = [
-            {'pk': i, 'username': f'tom{i}@tomchristie.com', 'is_admin': True, 'joined': datetime.datetime.now()}
-            for i in range(123)
-        ]
+        items = TABLES['users']
         if self._filter is not None:
             for key, value in self._filter.items():
-                items = [item for item in items if item[key] == value]
+                items = [item for item in items if getattr(item, key) == value]
         if self._order_by is not None:
-            items = sorted(items, key=lambda item: item[self._order_by], reverse=self._reverse)
+            items = sorted(items, key=lambda item: getattr(item, self._order_by), reverse=self._reverse)
         if self._offset is not None:
             items = items[self._offset:]
         if self._limit is not None:
@@ -71,4 +68,34 @@ class Datasource:
         return items[0] if items else None
 
     async def count(self) -> int:
-        return 123
+        items = await self.all()
+        return len(items)
+
+    async def create(self, **kwargs):
+        item = DataItem(**kwargs)
+        TABLES['users'].insert(0, item)
+
+
+class DataItem:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    async def delete(self):
+        TABLES['users'] = [item for item in TABLES['users'] if item.pk != self.pk]
+
+    async def update(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
+TABLES = {
+    'users': [
+        DataItem(
+            pk=i,
+            username=f'tom{i}@tomchristie.com',
+            is_admin=True,
+            joined=datetime.datetime.now()
+        ) for i in range(123)
+    ]
+}

@@ -1,4 +1,5 @@
 from starlette.exceptions import HTTPException
+from starlette.responses import RedirectResponse
 from starlette.routing import Router, Route
 from starlette.templating import Jinja2Templates
 import math
@@ -10,19 +11,16 @@ class Dashboard:
     PAGE_SIZE = 10
     LOOKUP_FIELD = 'pk'
 
-    def __init__(self):
+    def __init__(self, datasources):
         self.routes = [
             Route('/', endpoint=self.index, name='index'),
-            Route('/{tablename}', endpoint=self.table, name='table'),
-            Route('/{tablename}/{ident}', endpoint=self.detail, name='detail'),
+            Route('/{tablename}', endpoint=self.table, name='table', methods=['GET', 'POST']),
+            Route('/{tablename}/{ident}', endpoint=self.detail, name='detail', methods=['GET', 'POST']),
+            Route('/{tablename}/{ident}/delete', endpoint=self.delete, name='delete', methods=['POST']),
         ]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory='templates')
-        self.datasources = {
-            "users": Datasource(title="Users"),
-            "migrations": Datasource(title="Migrations"),
-            "log-records": Datasource(title="Log Records")
-        }
+        self.datasources = datasources
 
     async def __call__(self, scope, receive, send) -> None:
         await self.router(scope, receive, send)
@@ -83,22 +81,30 @@ class Dashboard:
             url=request.url, current_page=current_page, total_pages=total_pages
         )
 
-        view_style = request.query_params.get("view")
-        if view_style not in ("json", "table"):
-            view_style = "table"
+        if request.method == "POST":
+            form_values = await request.form()
+            validated_data, form_errors = datasource.schema.validate_or_error(form_values)
+            if not form_errors:
+                await datasource.create(**dict(validated_data))
+                return RedirectResponse(url=request.url, status_code=303)
+            status_code = 400
+        else:
+            form_values = None
+            form_errors = None
+            status_code = 200
 
         context = {
             "request": request,
             "schema": datasource.schema,
             "title": datasource.title,
-            "form_errors": {},
-            "form_values": {},
+            "form_errors": form_errors,
+            "form_values": form_values,
             "tablename": request.path_params["tablename"],
             "rows": rows,
             "column_controls": column_controls,
             "page_controls": page_controls,
-            "view_style": view_style,
-            "lookup_field": self.LOOKUP_FIELD
+            "lookup_field": self.LOOKUP_FIELD,
+            "can_edit": True
         }
         return self.templates.TemplateResponse(template, context)
 
@@ -116,9 +122,19 @@ class Dashboard:
         if item is None:
             raise HTTPException(status_code=404)
 
-        view_style = request.query_params.get("view")
-        if view_style not in ("json", "table"):
-            view_style = "table"
+        if request.method == "POST":
+            form_values = await request.form()
+            validated_data, form_errors = datasource.schema.validate_or_error(form_values)
+            if not form_errors:
+                await item.update(**dict(validated_data))
+                return RedirectResponse(url=request.url, status_code=303)
+            status_code = 400
+        else:
+            form_values = (
+                None if item is None else datasource.schema.make_validator().serialize(item)
+            )
+            form_errors = None
+            status_code = 200
 
         # Render the page
         context = {
@@ -127,9 +143,26 @@ class Dashboard:
             "title": datasource.title,
             "tablename": tablename,
             "item": item,
-            "form_values": {},
-            "form_errors": {},
-            "view_style": view_style,
-            "lookup_field": self.LOOKUP_FIELD
+            "form_values": form_values,
+            "form_errors": form_errors,
+            "lookup_field": self.LOOKUP_FIELD,
+            "can_edit": True
         }
-        return self.templates.TemplateResponse(template, context)
+        return self.templates.TemplateResponse(template, context, status_code=status_code)
+
+    async def delete(self, request):
+        tablename = request.path_params["tablename"]
+        ident = request.path_params["ident"]
+
+        datasource = self.datasources[tablename]
+
+        ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
+        lookup = {self.LOOKUP_FIELD: ident}
+        item = await datasource.get(**lookup)
+        if item is None:
+            raise HTTPException(status_code=404)
+
+        await item.delete()
+
+        url = request.url_for("dashboard:table", tablename=tablename)
+        return RedirectResponse(url=url, status_code=303)

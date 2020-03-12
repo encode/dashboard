@@ -8,7 +8,7 @@
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
-          <li class="breadcrumb-item active">{{ title }}</li>
+          <li class="breadcrumb-item active"><a href="{{ url_for('dashboard:table', tablename=tablename) }}">{{ title }}</a></li>
         </ol>
       </nav>
       </div>
@@ -30,7 +30,6 @@
       <div class="col-md-6" style="height: 54px">
         {% if can_edit %}
           <div style="float: right">
-          <a class="btn btn-outline-secondary" id="buttonEditColumns" href="{{ url_for('columns', username=owner, table_id=table_id) }}"><span class="oi oi-pencil" title="icon name" aria-hidden="true"></span> Edit Columns</a>
           <button class="btn btn-outline-primary" type="button" id="buttonNewRow" data-toggle="modal" data-target="#newRowModal"><span class="oi oi-plus" title="icon name" aria-hidden="true"></span> New Row</button>
           </div>
         {% endif %}
@@ -38,6 +37,7 @@
     </div>
     {% if rows %}
 
+    <!--
     <div class="row">
       <div class="col-md-12">
         <div class="dropdown" style="float: right; padding-bottom: 3px; border-left: 0; border-bottom: 1px solid #dee2e6">
@@ -60,10 +60,10 @@
       </ul>
     </div>
   </div>
+  -->
 
       <div class="row">
         <div class="col-md-12">
-          {% if view_style == "table" %}
           <table class="table dataset-list">
             <thead>
               <tr>
@@ -92,9 +92,6 @@
               {% endfor %}
             </tbody>
           </table>
-          {% else %}
-          <pre style="padding: 20px; font-size: 12px">{{ json_data }}</pre>
-          {% endif %}
         </div>
       </div>
       <div class="row">
@@ -127,12 +124,6 @@
             </div>
           </div>
         </div>
-    {% endif %}
-
-    {% if not table_has_columns and can_edit %}
-    <form id="uploadForm" action="{{ url_for('upload', username=owner, table_id=table_id) }}" method="POST" enctype="multipart/form-data">
-      <input id="uploadInput" name="upload-file" type="file" class="file">
-    </form>
     {% endif %}
   </div>
 </main>
