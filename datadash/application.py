@@ -3,8 +3,12 @@ from starlette.responses import RedirectResponse
 from starlette.routing import Router, Route
 from starlette.templating import Jinja2Templates
 import math
+import typesystem
 from . import ordering, pagination, search
 from .datasource import Datasource
+
+
+forms = typesystem.Jinja2Forms(directory='templates')
 
 
 class Dashboard:
@@ -81,24 +85,22 @@ class Dashboard:
             url=request.url, current_page=current_page, total_pages=total_pages
         )
 
+        form = forms.create_form(schema=datasource.schema)
         if request.method == "POST":
-            form_values = await request.form()
-            validated_data, form_errors = datasource.schema.validate_or_error(form_values)
-            if not form_errors:
-                await datasource.create(**dict(validated_data))
+            data = await request.form()
+            form.validate(data)
+            if form.is_valid:
+                await datasource.create(**form.validated_data)
                 return RedirectResponse(url=request.url, status_code=303)
             status_code = 400
         else:
-            form_values = None
-            form_errors = None
             status_code = 200
 
         context = {
             "request": request,
             "schema": datasource.schema,
             "title": datasource.title,
-            "form_errors": form_errors,
-            "form_values": form_values,
+            "form": form,
             "tablename": request.path_params["tablename"],
             "rows": rows,
             "column_controls": column_controls,
@@ -106,7 +108,7 @@ class Dashboard:
             "lookup_field": self.LOOKUP_FIELD,
             "can_edit": True
         }
-        return self.templates.TemplateResponse(template, context)
+        return self.templates.TemplateResponse(template, context, status_code=status_code)
 
     async def detail(self, request):
         template = "dashboard/detail.html"
@@ -122,18 +124,15 @@ class Dashboard:
         if item is None:
             raise HTTPException(status_code=404)
 
+        form = forms.create_form(schema=datasource.schema, instance=item)
         if request.method == "POST":
-            form_values = await request.form()
-            validated_data, form_errors = datasource.schema.validate_or_error(form_values)
-            if not form_errors:
-                await item.update(**dict(validated_data))
+            data = await request.form()
+            form.validate(data)
+            if form.is_valid:
+                await item.update(**form.validated_data)
                 return RedirectResponse(url=request.url, status_code=303)
             status_code = 400
         else:
-            form_values = (
-                None if item is None else datasource.schema.make_validator().serialize(item)
-            )
-            form_errors = None
             status_code = 200
 
         # Render the page
@@ -143,8 +142,7 @@ class Dashboard:
             "title": datasource.title,
             "tablename": tablename,
             "item": item,
-            "form_values": form_values,
-            "form_errors": form_errors,
+            "form": form,
             "lookup_field": self.LOOKUP_FIELD,
             "can_edit": True
         }

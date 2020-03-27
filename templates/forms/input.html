@@ -1,0 +1,15 @@
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label">
+        {{ label }}
+    </label>
+
+    <div class="col-sm-9">
+      <input type="{{ input_type }}" class="form-control {% if error %}is-invalid{% endif %}" id="{{ field_id }}" name="{{ field_name }}" {% if required %}required{% endif %} {% if value is not none %}value="{{ value }}"{% endif %}>
+
+      {% if error %}
+          <small class="invalid-feedback">{{ error }}</small>
+      {% elif field.description %}
+          <small class="form-text text-muted">{{ field.description }}</small>
+      {% endif %}
+    </div>
+</div>

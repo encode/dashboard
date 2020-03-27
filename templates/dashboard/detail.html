@@ -75,15 +75,7 @@
       </div>
       <form action="{{ request.url }}" method="POST">
       <div class="modal-body">
-        {% for key, field in schema.fields.items() %}
-        <div class="form-group row">
-          <label class="col-sm-3 col-form-label">{{ field.title }}</label>
-          <div class="col-sm-9">
-            <input type="text" name="{{ key }}" class="form-control {% if form_errors[key] %}is-invalid{% endif %}" value="{{ form_values[key] }}">
-             {% if form_errors[key] %}<div class="invalid-feedback">{{ form_errors[key] }}</div>{% endif %}
-          </div>
-        </div>
-        {% endfor %}
+        {{ form }}
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-outline-primary"><span class="oi oi-check" title="icon name" aria-hidden="true"></span> Save Changes</button>
@@ -95,7 +87,7 @@
 {% endblock %}
 
 {% block tail %}
-{% if form_errors %}
+{% if form.errors %}
 <script type="text/javascript">
   $('#editModal').removeClass('fade')
   $('#editModal').modal('show');

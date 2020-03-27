@@ -2,15 +2,16 @@ import datetime
 import typesystem
 
 
-class User(typesystem.Schema):
-    pk = typesystem.Integer(title="Identity")
-    username = typesystem.String(title="Username", max_length=100)
-    is_admin = typesystem.Boolean(title="Is Admin")
-    joined = typesystem.DateTime(title="Joined")
+user = typesystem.Schema(fields={
+    'pk': typesystem.Integer(title="Identity", read_only=True),
+    'username': typesystem.String(title="Username", max_length=100),
+    'is_admin': typesystem.Boolean(title="Is Admin", default=False),
+    'joined': typesystem.DateTime(title="Joined"),
+})
 
 
 class Datasource:
-    schema = User
+    schema = user
     title = 'Users'
 
     def __init__(self, title: str = None, filter: dict = None, search_term: str='', order_by: str=None, reverse: bool=False, offset: int=None, limit: int=None):
@@ -72,6 +73,8 @@ class Datasource:
         return len(items)
 
     async def create(self, **kwargs):
+        if 'pk' not in kwargs:
+            kwargs['pk'] = len(TABLES['users'])
         item = DataItem(**kwargs)
         TABLES['users'].insert(0, item)
 
