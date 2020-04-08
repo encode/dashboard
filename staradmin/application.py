@@ -54,11 +54,12 @@ class Dashboard:
 
         # Get some normalised information from URL query parameters
         current_page = pagination.get_page_number(url=request.url)
-        order_column, is_reverse = ordering.get_ordering(url=request.url, columns=columns)
+        order_by = ordering.get_ordering(url=request.url, columns=columns)
         search_term = search.get_search_term(url=request.url)
 
         # Filter by any search term
-        datasource = datasource.search(search_term)
+        if search_term:
+            datasource = datasource.search(search_term)
 
         # Determine pagination info
         count = await datasource.count()
@@ -67,8 +68,8 @@ class Dashboard:
         offset = (current_page - 1) * self.PAGE_SIZE
 
         # Perform column ordering
-        if order_column is not None:
-            datasource = datasource.order_by(order_by=order_column, reverse=is_reverse)
+        if order_by is not None:
+            datasource = datasource.order_by(order_by=order_by)
 
         #  Perform pagination
         datasource = datasource.offset(offset).limit(self.PAGE_SIZE)
@@ -78,8 +79,7 @@ class Dashboard:
         column_controls = ordering.get_column_controls(
             url=request.url,
             columns=columns,
-            selected_column=order_column,
-            is_reverse=is_reverse,
+            order_by=order_by,
         )
         page_controls = pagination.get_page_controls(
             url=request.url, current_page=current_page, total_pages=total_pages
@@ -106,7 +106,8 @@ class Dashboard:
             "column_controls": column_controls,
             "page_controls": page_controls,
             "lookup_field": self.LOOKUP_FIELD,
-            "can_edit": True
+            "can_edit": True,
+            "search_term": search_term
         }
         return self.templates.TemplateResponse(template, context, status_code=status_code)
 
@@ -118,7 +119,7 @@ class Dashboard:
 
         datasource = self.datasources[tablename]
 
-        ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
+        # ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
         item = await datasource.get(**lookup)
         if item is None:
@@ -154,7 +155,7 @@ class Dashboard:
 
         datasource = self.datasources[tablename]
 
-        ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
+        #ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
         item = await datasource.get(**lookup)
         if item is None:

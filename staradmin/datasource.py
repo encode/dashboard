@@ -39,8 +39,8 @@ class Datasource:
     def search(self, search_term: str) -> 'Datasource':
         return self.copy(search_term=search_term)
 
-    def order_by(self, order_by: str, reverse: bool = False) -> 'Datasource':
-        return self.copy(order_by=order_by, reverse=reverse)
+    def order_by(self, order_by: str) -> 'Datasource':
+        return self.copy(order_by=order_by)
 
     def offset(self, offset: int) -> 'Datasource':
         return self.copy(offset=offset)
