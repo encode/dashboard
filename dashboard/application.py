@@ -8,7 +8,7 @@ from . import ordering, pagination, search
 from .datasource import Datasource
 
 
-forms = typesystem.Jinja2Forms(directory='templates')
+forms = typesystem.Jinja2Forms(directory="templates")
 
 
 class TableMount(Mount):
@@ -25,13 +25,11 @@ class TableMount(Mount):
 
 class Dashboard:
     def __init__(self, tables):
-        self.routes = [
-            Route('/', endpoint=self.index, name='index'),
-        ] + [
+        self.routes = [Route("/", endpoint=self.index, name="index"),] + [
             TableMount(table) for table in tables
         ]
         self.router = Router(routes=self.routes)
-        self.templates = Jinja2Templates(directory='templates')
+        self.templates = Jinja2Templates(directory="templates")
         self.tables = tables
 
     async def __call__(self, scope, receive, send) -> None:
@@ -42,9 +40,10 @@ class Dashboard:
         rows = [
             {
                 "text": table.title,
-                "url": request.url_for('dashboard:table', tablename=table.tablename),
+                "url": request.url_for("dashboard:table", tablename=table.tablename),
                 "count": await table.datasource.count(),
-            } for table in self.tables
+            }
+            for table in self.tables
         ]
         context = {
             "request": request,
@@ -55,16 +54,20 @@ class Dashboard:
 
 class DashboardTable:
     PAGE_SIZE = 10
-    LOOKUP_FIELD = 'pk'
+    LOOKUP_FIELD = "pk"
 
     def __init__(self, ident, title, datasource):
         self.routes = [
-            Route('/', endpoint=self.table, name='table', methods=['GET', 'POST']),
-            Route('/{ident}', endpoint=self.detail, name='detail', methods=['GET', 'POST']),
-            Route('/{ident}/delete', endpoint=self.delete, name='delete', methods=['POST']),
+            Route("/", endpoint=self.table, name="table", methods=["GET", "POST"]),
+            Route(
+                "/{ident}", endpoint=self.detail, name="detail", methods=["GET", "POST"]
+            ),
+            Route(
+                "/{ident}/delete", endpoint=self.delete, name="delete", methods=["POST"]
+            ),
         ]
         self.router = Router(routes=self.routes)
-        self.templates = Jinja2Templates(directory='templates')
+        self.templates = Jinja2Templates(directory="templates")
         self.title = title
         self.tablename = ident
         self.datasource = datasource
@@ -105,9 +108,7 @@ class DashboardTable:
 
         # Get pagination and column controls to render on the page
         column_controls = ordering.get_column_controls(
-            url=request.url,
-            columns=columns,
-            order_by=order_by,
+            url=request.url, columns=columns, order_by=order_by,
         )
         page_controls = pagination.get_page_controls(
             url=request.url, current_page=current_page, total_pages=total_pages
@@ -135,9 +136,11 @@ class DashboardTable:
             "page_controls": page_controls,
             "lookup_field": self.LOOKUP_FIELD,
             "can_edit": True,
-            "search_term": search_term
+            "search_term": search_term,
         }
-        return self.templates.TemplateResponse(template, context, status_code=status_code)
+        return self.templates.TemplateResponse(
+            template, context, status_code=status_code
+        )
 
     async def detail(self, request):
         template = "dashboard/detail.html"
@@ -173,9 +176,11 @@ class DashboardTable:
             "item": item,
             "form": form,
             "lookup_field": self.LOOKUP_FIELD,
-            "can_edit": True
+            "can_edit": True,
         }
-        return self.templates.TemplateResponse(template, context, status_code=status_code)
+        return self.templates.TemplateResponse(
+            template, context, status_code=status_code
+        )
 
     async def delete(self, request):
         tablename = self.tablename
@@ -183,7 +188,7 @@ class DashboardTable:
 
         ident = request.path_params["ident"]
 
-        #ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
+        # ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
         item = await datasource.get(**lookup)
         if item is None:

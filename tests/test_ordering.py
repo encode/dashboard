@@ -68,9 +68,7 @@ def test_get_column_controls_forward_current_selection():
     url = URL("/?order=username")
     column, is_reverse = "username", False
 
-    controls = get_column_controls(
-        url, columns, order_by="username"
-    )
+    controls = get_column_controls(url, columns, order_by="username")
 
     assert controls == [
         ColumnControl(
@@ -94,9 +92,7 @@ def test_get_column_controls_reverse_current_selection():
     columns = {"username": "Username", "email": "Email"}
     url = URL("/?order=-username")
 
-    controls = get_column_controls(
-        url=url, columns=columns, order_by="-username"
-    )
+    controls = get_column_controls(url=url, columns=columns, order_by="-username")
 
     assert controls == [
         ColumnControl(
