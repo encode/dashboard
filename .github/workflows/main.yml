@@ -1,5 +1,5 @@
 ---
-name: CI
+name: Test Suite
 
 on:
   push:
