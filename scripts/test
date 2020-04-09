@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+if [ -d 'venv' ] ; then
+    PREFIX="venv/bin/"
+else
+    PREFIX=""
+fi
+
+set -x
+
+PYTHONPATH=. ${PREFIX}pytest tests
