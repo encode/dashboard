@@ -29,12 +29,10 @@ admin = dashboard.Dashboard(tables=[
     dashboard.DashboardTable(ident="users", title="Users", datasource=dashboard.Datasource()),
     dashboard.DashboardTable(ident="notes", title="Notes", datasource=Notes.objects.order_by('-id')),
 ])
-auth = dashboard.Auth()
 
 
 routes = [
     Mount("/admin", app=admin, name='dashboard'),
-    Mount("/auth", app=auth, name='auth'),
     Mount("/statics", app=statics, name='static')
 ]
 
