@@ -1,13 +1,12 @@
 from starlette.applications import Starlette
 from starlette.config import Config
-from starlette.responses import JSONResponse
 from starlette.routing import Route, Mount
 from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
-from staradmin import Auth, Dashboard, Datasource
-from databases import Database
+from staradmin import Auth, Dashboard, DashboardTable, Datasource
+import databases
 import orm
 import datetime
 
@@ -17,7 +16,7 @@ SECRET_KEY = config('SECRET_KEY', cast=str, default='123')
 HTTPS_ONLY = config('HTTPS_ONLY', cast=bool, default=False)
 
 
-database = Database('sqlite:///test.db')
+database = databases.Database('sqlite:///test.db')
 models = orm.ModelRegistry(database=database)
 templates = Jinja2Templates(directory='templates')
 statics = StaticFiles(directory='statics')
@@ -34,12 +33,10 @@ class Notes(orm.Model):
     }
 
 
-dashboard = Dashboard(datasources={
-    "users": Datasource(title="Users"),
-    "migrations": Datasource(title="Migrations"),
-    "log-records": Datasource(title="Log Records"),
-    "notes": Notes.objects.order_by('-id')
-})
+dashboard = Dashboard(tables=[
+    DashboardTable(ident="users", title="Users", datasource=Datasource()),
+    DashboardTable(ident="notes", title="Notes", datasource=Notes.objects.order_by('-id')),
+])
 auth = Auth()
 
 
