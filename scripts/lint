@@ -5,8 +5,8 @@ if [ -d 'venv' ] ; then
 else
     PREFIX=""
 fi
+PACKAGE="dashboard"
 
 set -x
 
-${PREFIX}black ${PACKAGE} tests --check
-PYTHONPATH=. ${PREFIX}pytest tests
+${PREFIX}black ${PACKAGE} tests

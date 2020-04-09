@@ -16,9 +16,7 @@ class ColumnControl:
         return self.is_forward_sorted or self.is_reverse_sorted
 
 
-def get_ordering(
-    url: URL, columns: typing.Dict[str, str]
-) -> typing.Optional[str]:
+def get_ordering(url: URL, columns: typing.Dict[str, str]) -> typing.Optional[str]:
     """
     Determine a column ordering based on the URL query string.
     """
@@ -30,11 +28,9 @@ def get_ordering(
 
 
 def get_column_controls(
-    url: URL,
-    columns: typing.Dict[str, str],
-    order_by: typing.Optional[str],
+    url: URL, columns: typing.Dict[str, str], order_by: typing.Optional[str],
 ) -> typing.List[ColumnControl]:
-    selected_column = None if order_by is None else order_by.lstrip('-')
+    selected_column = None if order_by is None else order_by.lstrip("-")
     is_reverse = order_by is not None and order_by.startswith("-")
 
     controls = []
