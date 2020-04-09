@@ -1,6 +1,6 @@
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse
-from starlette.routing import Router, Route
+from starlette.routing import Router, Route, Mount, NoMatchFound
 from starlette.templating import Jinja2Templates
 import math
 import typesystem
@@ -11,20 +11,28 @@ from .datasource import Datasource
 forms = typesystem.Jinja2Forms(directory='templates')
 
 
-class Dashboard:
-    PAGE_SIZE = 10
-    LOOKUP_FIELD = 'pk'
+class TableMount(Mount):
+    def __init__(self, table):
+        super().__init__(f"/{table.tablename}", app=table)
+        self.tablename = table.tablename
 
-    def __init__(self, datasources):
+    def url_path_for(self, name: str, **path_params: str):
+        tablename = path_params.pop("tablename", None)
+        if tablename != self.tablename:
+            raise NoMatchFound()
+        return super().url_path_for(name, **path_params)
+
+
+class Dashboard:
+    def __init__(self, tables):
         self.routes = [
             Route('/', endpoint=self.index, name='index'),
-            Route('/{tablename}', endpoint=self.table, name='table', methods=['GET', 'POST']),
-            Route('/{tablename}/{ident}', endpoint=self.detail, name='detail', methods=['GET', 'POST']),
-            Route('/{tablename}/{ident}/delete', endpoint=self.delete, name='delete', methods=['POST']),
+        ] + [
+            TableMount(table) for table in tables
         ]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory='templates')
-        self.datasources = datasources
+        self.tables = tables
 
     async def __call__(self, scope, receive, send) -> None:
         await self.router(scope, receive, send)
@@ -33,10 +41,10 @@ class Dashboard:
         template = "dashboard/index.html"
         rows = [
             {
-                "text": datasource.title,
-                "url": request.url_for('dashboard:table', tablename=key),
-                "count": await datasource.count(),
-            } for key, datasource in self.datasources.items()
+                "text": table.title,
+                "url": request.url_for('dashboard:table', tablename=table.tablename),
+                "count": await table.datasource.count(),
+            } for table in self.tables
         ]
         context = {
             "request": request,
@@ -44,21 +52,42 @@ class Dashboard:
         }
         return self.templates.TemplateResponse(template, context)
 
+
+class DashboardTable:
+    PAGE_SIZE = 10
+    LOOKUP_FIELD = 'pk'
+
+    def __init__(self, ident, tablename, datasource):
+        self.routes = [
+            Route('/', endpoint=self.table, name='table', methods=['GET', 'POST']),
+            Route('/{ident}', endpoint=self.detail, name='detail', methods=['GET', 'POST']),
+            Route('/{ident}/delete', endpoint=self.delete, name='delete', methods=['POST']),
+        ]
+        self.router = Router(routes=self.routes)
+        self.templates = Jinja2Templates(directory='templates')
+        self.title = title
+        self.tablename = ident
+        self.datasource = datasource
+
+    async def __call__(self, scope, receive, send) -> None:
+        await self.router(scope, receive, send)
+
     async def table(self, request):
         template = "dashboard/table.html"
-        tablename = request.path_params["tablename"]
 
-        datasource = self.datasources[tablename]
+        tablename = self.tablename
+        datasource = self.datasource
 
         columns = {key: field.title for key, field in datasource.schema.fields.items()}
 
         # Get some normalised information from URL query parameters
         current_page = pagination.get_page_number(url=request.url)
-        order_column, is_reverse = ordering.get_ordering(url=request.url, columns=columns)
+        order_by = ordering.get_ordering(url=request.url, columns=columns)
         search_term = search.get_search_term(url=request.url)
 
         # Filter by any search term
-        datasource = datasource.search(search_term)
+        if search_term:
+            datasource = datasource.search(search_term)
 
         # Determine pagination info
         count = await datasource.count()
@@ -67,8 +96,8 @@ class Dashboard:
         offset = (current_page - 1) * self.PAGE_SIZE
 
         # Perform column ordering
-        if order_column is not None:
-            datasource = datasource.order_by(order_by=order_column, reverse=is_reverse)
+        if order_by is not None:
+            datasource = datasource.order_by(order_by=order_by)
 
         #  Perform pagination
         datasource = datasource.offset(offset).limit(self.PAGE_SIZE)
@@ -78,8 +107,7 @@ class Dashboard:
         column_controls = ordering.get_column_controls(
             url=request.url,
             columns=columns,
-            selected_column=order_column,
-            is_reverse=is_reverse,
+            order_by=order_by,
         )
         page_controls = pagination.get_page_controls(
             url=request.url, current_page=current_page, total_pages=total_pages
@@ -99,26 +127,27 @@ class Dashboard:
         context = {
             "request": request,
             "schema": datasource.schema,
-            "title": datasource.title,
+            "title": self.title,
             "form": form,
-            "tablename": request.path_params["tablename"],
+            "tablename": self.tablename,
             "rows": rows,
             "column_controls": column_controls,
             "page_controls": page_controls,
             "lookup_field": self.LOOKUP_FIELD,
-            "can_edit": True
+            "can_edit": True,
+            "search_term": search_term
         }
         return self.templates.TemplateResponse(template, context, status_code=status_code)
 
     async def detail(self, request):
         template = "dashboard/detail.html"
 
-        tablename = request.path_params["tablename"]
+        tablename = self.tablename
+        datasource = self.datasource
+
         ident = request.path_params["ident"]
 
-        datasource = self.datasources[tablename]
-
-        ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
+        # ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
         item = await datasource.get(**lookup)
         if item is None:
@@ -139,7 +168,7 @@ class Dashboard:
         context = {
             "request": request,
             "schema": datasource.schema,
-            "title": datasource.title,
+            "title": self.title,
             "tablename": tablename,
             "item": item,
             "form": form,
@@ -149,12 +178,12 @@ class Dashboard:
         return self.templates.TemplateResponse(template, context, status_code=status_code)
 
     async def delete(self, request):
-        tablename = request.path_params["tablename"]
+        tablename = self.tablename
+        datasource = self.datasource
+
         ident = request.path_params["ident"]
 
-        datasource = self.datasources[tablename]
-
-        ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
+        #ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
         item = await datasource.get(**lookup)
         if item is None:

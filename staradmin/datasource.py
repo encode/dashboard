@@ -12,10 +12,8 @@ user = typesystem.Schema(fields={
 
 class Datasource:
     schema = user
-    title = 'Users'
 
-    def __init__(self, title: str = None, filter: dict = None, search_term: str='', order_by: str=None, reverse: bool=False, offset: int=None, limit: int=None):
-        self.title = title
+    def __init__(self, filter: dict = None, search_term: str='', order_by: str=None, reverse: bool=False, offset: int=None, limit: int=None):
         self._filter = filter
         self._search_term = search_term
         self._order_by = order_by
@@ -25,7 +23,6 @@ class Datasource:
 
     def copy(self, **kwargs):
         base_kwargs = {
-            'title': self.title,
             'filter': self._filter,
             'search_term': self._search_term,
             'order_by': self._order_by,
@@ -39,8 +36,8 @@ class Datasource:
     def search(self, search_term: str) -> 'Datasource':
         return self.copy(search_term=search_term)
 
-    def order_by(self, order_by: str, reverse: bool = False) -> 'Datasource':
-        return self.copy(order_by=order_by, reverse=reverse)
+    def order_by(self, order_by: str) -> 'Datasource':
+        return self.copy(order_by=order_by)
 
     def offset(self, offset: int) -> 'Datasource':
         return self.copy(offset=offset)

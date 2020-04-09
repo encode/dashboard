@@ -18,40 +18,25 @@ class ColumnControl:
 
 def get_ordering(
     url: URL, columns: typing.Dict[str, str]
-) -> typing.Tuple[typing.Optional[str], bool]:
+) -> typing.Optional[str]:
     """
     Determine a column ordering based on the URL query string.
-    Returned as a tuple of (ordering, is_reverse).
     """
     query_params = QueryParams(url.query)
-
-    ordering = query_params.get("order", default="")
-    order_column = ordering.lstrip("-")
-    order_reverse = ordering.startswith("-")
-    if order_column not in columns:
-        return None, False
-    return order_column, order_reverse
-
-
-def sort_by_ordering(
-    items: list, column: typing.Optional[str], is_reverse: bool
-) -> list:
-    """
-    Sort a data set by an ordering column.
-    """
-    if column is None:
-        return items
-
-    sort_key = lambda item: (item[column], item["pk"])
-    return sorted(items, key=sort_key, reverse=is_reverse)
+    order_by = query_params.get("order")
+    if order_by is not None and order_by.lstrip("-") not in columns:
+        return None
+    return order_by
 
 
 def get_column_controls(
     url: URL,
     columns: typing.Dict[str, str],
-    selected_column: typing.Optional[str],
-    is_reverse: bool,
+    order_by: typing.Optional[str],
 ) -> typing.List[ColumnControl]:
+    selected_column = None if order_by is None else order_by.lstrip('-')
+    is_reverse = order_by is not None and order_by.startswith("-")
+
     controls = []
     for column_id, name in columns.items():
 
