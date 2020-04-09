@@ -2,8 +2,10 @@ aiofiles
 starlette
 uvicorn
 jinja2
-itsdangerous
+python-multipart
+orm==0.2.0.dev0
 typesystem==0.3.0.dev0
+databases[sqlite]
 
 # Tests
 pytest
