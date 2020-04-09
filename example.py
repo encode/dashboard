@@ -1,19 +1,11 @@
 from starlette.applications import Starlette
-from starlette.config import Config
-from starlette.routing import Route, Mount
+from starlette.routing import Mount
 from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
-from starlette.middleware import Middleware
-from starlette.middleware.sessions import SessionMiddleware
 import databases
 import dashboard
 import orm
 import datetime
-
-
-config = Config()
-SECRET_KEY = config('SECRET_KEY', cast=str, default='123')
-HTTPS_ONLY = config('HTTPS_ONLY', cast=bool, default=False)
 
 
 database = databases.Database('sqlite:///test.db')
@@ -46,8 +38,4 @@ routes = [
     Mount("/statics", app=statics, name='static')
 ]
 
-middleware = [
-    Middleware(SessionMiddleware, secret_key=SECRET_KEY, https_only=HTTPS_ONLY)
-]
-
-app = Starlette(debug=True, routes=routes, middleware=middleware, on_startup=[database.connect], on_shutdown=[database.disconnect])
+app = Starlette(debug=True, routes=routes, on_startup=[database.connect], on_shutdown=[database.disconnect])
