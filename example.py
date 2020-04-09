@@ -1,5 +1,6 @@
 from starlette.applications import Starlette
-from starlette.routing import Mount
+from starlette.routing import Mount, Route
+from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 import databases
@@ -23,7 +24,6 @@ class Notes(orm.Model):
         'completed': orm.Boolean(title="Completed", default=False)
     }
 
-
 admin = dashboard.Dashboard(tables=[
     dashboard.DashboardTable(ident="notes", title="Notes", datasource=Notes.objects.order_by('-id')),
 ])
@@ -31,7 +31,8 @@ admin = dashboard.Dashboard(tables=[
 
 routes = [
     Mount("/admin", app=admin, name='dashboard'),
-    Mount("/statics", app=statics, name='static')
+    Mount("/statics", app=statics, name='static'),
+    Route("/", endpoint=RedirectResponse(url='/admin')),
 ]
 
 app = Starlette(debug=True, routes=routes, on_startup=[database.connect], on_shutdown=[database.disconnect])
