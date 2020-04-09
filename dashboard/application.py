@@ -163,7 +163,6 @@ class DashboardTable:
 
         ident = request.path_params["ident"]
 
-        # ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
         item = await datasource.filter(**lookup).get()
         if item is None:
@@ -201,7 +200,6 @@ class DashboardTable:
 
         ident = request.path_params["ident"]
 
-        # ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
         item = await datasource.filter(**lookup).get()
         if item is None:
