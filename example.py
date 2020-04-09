@@ -25,8 +25,30 @@ class Notes(orm.Model):
     }
 
 
+import typesystem
+import random
+import datetime
+
+
+users = dashboard.MockDataSource(
+    schema=typesystem.Schema(
+        fields={
+            "pk": typesystem.Integer(title="Identity", read_only=True, default=dashboard.autoincrement()),
+            "username": typesystem.String(title="Username", max_length=100),
+            "is_admin": typesystem.Boolean(title="Is Admin", default=False),
+            "joined": typesystem.DateTime(title="Joined", read_only=True, default=datetime.datetime.now),
+        }
+    ),
+    initial=[
+        {
+            "username": f"user{i}@example.org",
+            "is_admin": random.choice([True, False]),
+        } for i in range(123)
+    ]
+)
+
 admin = dashboard.Dashboard(tables=[
-    dashboard.DashboardTable(ident="users", title="Users", datasource=dashboard.Datasource()),
+    dashboard.DashboardTable(ident="users", title="Users", datasource=users.order_by('-pk')),
     dashboard.DashboardTable(ident="notes", title="Notes", datasource=Notes.objects.order_by('-id')),
 ])
 

@@ -5,7 +5,7 @@ from starlette.templating import Jinja2Templates
 import math
 import typesystem
 from . import ordering, pagination, search
-from .datasource import Datasource
+from .datasource import DataSource
 
 
 forms = typesystem.Jinja2Forms(directory="templates")
@@ -152,7 +152,7 @@ class DashboardTable:
 
         # ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
-        item = await datasource.get(**lookup)
+        item = await datasource.filter(**lookup).get()
         if item is None:
             raise HTTPException(status_code=404)
 
@@ -190,7 +190,7 @@ class DashboardTable:
 
         # ident = datasource.schema.fields[self.LOOKUP_FIELD].validate(ident)
         lookup = {self.LOOKUP_FIELD: ident}
-        item = await datasource.get(**lookup)
+        item = await datasource.filter(**lookup).get()
         if item is None:
             raise HTTPException(status_code=404)
 
