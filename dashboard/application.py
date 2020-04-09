@@ -57,7 +57,7 @@ class DashboardTable:
     PAGE_SIZE = 10
     LOOKUP_FIELD = 'pk'
 
-    def __init__(self, ident, tablename, datasource):
+    def __init__(self, ident, title, datasource):
         self.routes = [
             Route('/', endpoint=self.table, name='table', methods=['GET', 'POST']),
             Route('/{ident}', endpoint=self.detail, name='detail', methods=['GET', 'POST']),

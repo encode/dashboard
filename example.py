@@ -5,8 +5,8 @@ from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
-from staradmin import Auth, Dashboard, DashboardTable, Datasource
 import databases
+import dashboard
 import orm
 import datetime
 
@@ -33,15 +33,15 @@ class Notes(orm.Model):
     }
 
 
-dashboard = Dashboard(tables=[
-    DashboardTable(ident="users", title="Users", datasource=Datasource()),
-    DashboardTable(ident="notes", title="Notes", datasource=Notes.objects.order_by('-id')),
+admin = dashboard.Dashboard(tables=[
+    dashboard.DashboardTable(ident="users", title="Users", datasource=dashboard.Datasource()),
+    dashboard.DashboardTable(ident="notes", title="Notes", datasource=Notes.objects.order_by('-id')),
 ])
-auth = Auth()
+auth = dashboard.Auth()
 
 
 routes = [
-    Mount("/admin", app=dashboard, name='dashboard'),
+    Mount("/admin", app=admin, name='dashboard'),
     Mount("/auth", app=auth, name='auth'),
     Mount("/statics", app=statics, name='static')
 ]
