@@ -4,11 +4,12 @@ from starlette.routing import Router, Route, Mount, NoMatchFound
 from starlette.templating import Jinja2Templates
 import math
 import typesystem
+import jinja2
 from . import ordering, pagination, search
 from .datasource import DataSource
 
 
-forms = typesystem.Jinja2Forms(directory="templates")
+forms = typesystem.Jinja2Forms(directory="templates", package="dashboard")
 
 
 class TableMount(Mount):
@@ -30,6 +31,12 @@ class Dashboard:
         ]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory="templates")
+        self.templates.env.loader = jinja2.ChoiceLoader(
+            [
+                jinja2.FileSystemLoader("templates"),
+                jinja2.PackageLoader("dashboard", "templates"),
+            ]
+        )
         self.tables = tables
 
     async def __call__(self, scope, receive, send) -> None:
@@ -68,6 +75,12 @@ class DashboardTable:
         ]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory="templates")
+        self.templates.env.loader = jinja2.ChoiceLoader(
+            [
+                jinja2.FileSystemLoader("templates"),
+                jinja2.PackageLoader("dashboard", "templates"),
+            ]
+        )
         self.title = title
         self.tablename = ident
         self.datasource = datasource
