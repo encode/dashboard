@@ -4,4 +4,7 @@ uvicorn
 jinja2
 itsdangerous
 typesystem==0.3.0.dev0
+
+# Tests
 pytest
+requests

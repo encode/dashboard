@@ -25,24 +25,6 @@
       <div class="container">
         <a class="navbar-brand" href="{{ url_for('dashboard:index') }}">Starlette</a>
         <ul class="navbar-nav mr-auto"></ul>
-        {% if request.session.username %}
-        <div class="dropdown">
-          <a style="color: white" class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <img src="{{ request.session.avatar_url }}" class="rounded float-left" alt="{{ request.session.username }}" width=20px height=20px/>
-          </a>
-
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
-            <p class="dropdown-header">Logged in as <strong>{{ request.session.username }}</strong></p>
-            <div class="dropdown-divider"></div>
-            <div class="dropdown-divider"></div>
-            <form action="{{ url_for('auth:logout') }}" method="POST"><button class="dropdown-item btn-link" type="submit">Logout</button></form>
-          </div>
-        </div>
-        {% else %}
-        <form class="form-inline" action="{{ url_for('auth:login') }}", method="POST">
-          <button class="btn btn-outline-light" type="submit">Login</button>
-        </form>
-        {% endif %}
       </div>
     </nav>
     {% block content %}{% endblock %}
