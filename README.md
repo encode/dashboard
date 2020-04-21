@@ -51,11 +51,8 @@ Rough installation...
 $ virtualenv venv
 $ venv/bin/pip install dashboard
 $ venv/bin/python
->>> import sqlalchemy
 >>> from example import models
->>> models.load()
->>> engine = sqlalchemy.create_engine('sqlite:///test.db')
->>> models.metadata.create_all(engine)
+>>> models.create_all()
 $ venv/bin/uvicorn example:app
 ```
 
