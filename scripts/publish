@@ -6,11 +6,19 @@ else
     PREFIX=""
 fi
 
+VERSION=`grep __version__ ./dashboard/__init__.py | grep -o '[0-9][^"]*'`
+
+echo Version: $VERSION
 echo GitHub Ref: $GITHUB_REF
+if [[ "refs/tags/${VERSION}" == ${GITHUB_REF} ]] ; then
+  echo "Matched"
+else
+  echo "Did not match"
+fi
 
 set -x
 
 ${PREFIX}pip install twine
 ${PREFIX}pip install wheel
 ${PREFIX}python setup.py sdist bdist_wheel
-${PREFIX}twine check
+${PREFIX}twine check dist
