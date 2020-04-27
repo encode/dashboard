@@ -4,7 +4,7 @@ name: Publish to PyPI
 on:
   push:
     tags:
-      - "*"
+      - "[0-9]*"
 
 jobs:
   publish:
