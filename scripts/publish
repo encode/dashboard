@@ -17,4 +17,5 @@ if [ "refs/tags/${VERSION}" = "${GITHUB_REF}" ] ; then
   ${PREFIX}twine upload dist/*
 else
   echo "GitHub Ref '${GITHUB_REF}' did not match package version '${VERSION}'"
+  exit 1
 fi
