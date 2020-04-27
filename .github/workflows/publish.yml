@@ -1,10 +1,10 @@
 ---
-name: Publish
+name: Publish to PyPI
 
 on:
   push:
     tags:
-      - v*
+      - "*"
 
 jobs:
   publish:
