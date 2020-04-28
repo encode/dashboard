@@ -25,5 +25,3 @@ jobs:
         run: "scripts/install"
       - name: "Run tests"
         run: "scripts/test"
-      - name: "Deploy docs"
-        run: "scripts/deploy-docs"
