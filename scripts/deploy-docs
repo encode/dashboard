@@ -14,4 +14,4 @@ fi
 set -x
 
 ${PREFIX}pip install mkdocs mkdocs-material mkautodoc
-${PREFIX}mkdocs gh-deploy
+${PREFIX}mkdocs gh-deploy --force
