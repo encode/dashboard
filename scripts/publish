@@ -6,16 +6,21 @@ else
     PREFIX=""
 fi
 
-VERSION=`grep __version__ ./dashboard/__init__.py | grep -o '[0-9][^"]*'`
+if [ ! -z "$GITHUB_ACTIONS" ]; then
+  git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  git config --local user.name "GitHub Action"
+
+  VERSION=`grep __version__ ./dashboard/__init__.py | grep -o '[0-9][^"]*'`
+
+  if [ "refs/tags/${VERSION}" != "${GITHUB_REF}" ] ; then
+    echo "GitHub Ref '${GITHUB_REF}' did not match package version '${VERSION}'"
+    exit 1
+  fi
+fi
 
 set -x
 
-${PREFIX}pip install twine
-${PREFIX}pip install wheel
+${PREFIX}pip install twine wheel mkdocs mkdocs-material mkautodoc
 ${PREFIX}python setup.py sdist bdist_wheel
-if [ "refs/tags/${VERSION}" = "${GITHUB_REF}" ] ; then
-  ${PREFIX}twine upload dist/*
-else
-  echo "GitHub Ref '${GITHUB_REF}' did not match package version '${VERSION}'"
-  exit 1
-fi
+${PREFIX}twine upload dist/*
+${PREFIX}mkdocs gh-deploy --force
