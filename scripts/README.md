@@ -1,7 +1,7 @@
 # Development Scripts
 
 * `scripts/build` - Build python package and documentations.
-* `scripts/check` - Build python package and documentations.
+* `scripts/check` - Run the code linting, checking that it passes.
 * `scripts/clean` - Delete any build artifacts.
 * `scripts/coverage` - Check test coverage.
 * `scripts/docs` - Run the documentation server locally.
