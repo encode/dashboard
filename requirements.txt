@@ -8,6 +8,18 @@ typesystem==0.3.0.dev0
 databases[sqlite]
 
 # Tests
-pytest
-requests
 black
+codecov
+mypy
+pytest
+pytest-cov
+requests
+
+# Documentation
+mkdocs
+mkdocs-material
+mkautodoc
+
+# Packaging
+twine
+wheel 

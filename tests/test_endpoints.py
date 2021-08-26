@@ -23,7 +23,11 @@ def app():
             }
         ),
         initial=[
-            {"username": f"user{i}@example.org", "is_admin": False,} for i in range(123)
+            {
+                "username": f"user{i}@example.org",
+                "is_admin": False,
+            }
+            for i in range(123)
         ],
     )
 
@@ -34,7 +38,11 @@ def app():
 
     return Starlette(
         routes=[
-            Mount("/admin", admin, name="dashboard",),
+            Mount(
+                "/admin",
+                admin,
+                name="dashboard",
+            ),
             Mount("/statics", ..., name="static"),
         ]
     )

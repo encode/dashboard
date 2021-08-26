@@ -26,9 +26,9 @@ class TableMount(Mount):
 
 class Dashboard:
     def __init__(self, tables):
-        self.routes = [Route("/", endpoint=self.index, name="index"),] + [
-            TableMount(table) for table in tables
-        ]
+        self.routes = [
+            Route("/", endpoint=self.index, name="index"),
+        ] + [TableMount(table) for table in tables]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory="templates")
         self.templates.env.loader = jinja2.ChoiceLoader(
@@ -121,7 +121,9 @@ class DashboardTable:
 
         # Get pagination and column controls to render on the page
         column_controls = ordering.get_column_controls(
-            url=request.url, columns=columns, order_by=order_by,
+            url=request.url,
+            columns=columns,
+            order_by=order_by,
         )
         page_controls = pagination.get_page_controls(
             url=request.url, current_page=current_page, total_pages=total_pages
