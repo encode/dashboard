@@ -3,7 +3,7 @@ starlette
 uvicorn
 jinja2
 python-multipart
-orm==0.2.0.dev0
+orm==0.2.0.dev1
 typesystem==0.3.0.dev0
 databases[sqlite]
 
