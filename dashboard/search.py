@@ -1,5 +1,6 @@
-from starlette.datastructures import URL, QueryParams
 import typing
+
+from starlette.datastructures import URL, QueryParams
 
 
 def get_search_term(url: URL) -> typing.Optional[str]:

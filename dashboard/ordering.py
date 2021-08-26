@@ -1,6 +1,7 @@
-from dataclasses import dataclass
-from starlette.datastructures import URL, QueryParams
 import typing
+from dataclasses import dataclass
+
+from starlette.datastructures import URL, QueryParams
 
 
 @dataclass

@@ -1,7 +1,6 @@
-import datetime
-import typesystem
 import typing
 
+import typesystem
 
 user = typesystem.Schema(
     fields={

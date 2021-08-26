@@ -1,13 +1,13 @@
+import math
+
+import jinja2
+import typesystem
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse
-from starlette.routing import Router, Route, Mount, NoMatchFound
+from starlette.routing import Mount, NoMatchFound, Route, Router
 from starlette.templating import Jinja2Templates
-import math
-import typesystem
-import jinja2
-from . import ordering, pagination, search
-from .datasource import DataSource
 
+from . import ordering, pagination, search
 
 forms = typesystem.Jinja2Forms(directory="templates", package="dashboard")
 
@@ -91,7 +91,6 @@ class DashboardTable:
     async def table(self, request):
         template = "dashboard/table.html"
 
-        tablename = self.tablename
         datasource = self.datasource
 
         columns = {key: field.title for key, field in datasource.schema.fields.items()}

@@ -8,8 +8,11 @@ typesystem==0.3.0.dev0
 databases[sqlite]
 
 # Tests
+autoflake
 black
 codecov
+flake8
+isort
 mypy
 pytest
 pytest-cov

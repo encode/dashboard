@@ -1,10 +1,12 @@
-import dashboard
-import typesystem
 import datetime
+
+import pytest
+import typesystem
 from starlette.applications import Starlette
 from starlette.routing import Mount
 from starlette.testclient import TestClient
-import pytest
+
+import dashboard
 
 
 @pytest.fixture

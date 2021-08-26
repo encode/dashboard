@@ -1,5 +1,6 @@
-from dashboard.pagination import PageControl, get_page_controls, get_page_number
 from starlette.datastructures import URL
+
+from dashboard.pagination import PageControl, get_page_controls, get_page_number
 
 
 def test_single_page_does_not_include_any_pagination_controls():
