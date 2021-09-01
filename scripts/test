@@ -1,12 +1,18 @@
-#!/bin/sh -e
+#!/bin/sh
 
+export PREFIX=""
 if [ -d 'venv' ] ; then
-    PREFIX="venv/bin/"
-else
-    PREFIX=""
+    export PREFIX="venv/bin/"
 fi
 
-set -x
+set -ex
 
-${PREFIX}black ${PACKAGE} tests --check
-PYTHONPATH=. ${PREFIX}pytest tests
+if [ -z $GITHUB_ACTIONS ]; then
+    scripts/check
+fi
+
+${PREFIX}coverage run -m pytest $@
+
+if [ -z $GITHUB_ACTIONS ]; then
+    scripts/coverage
+fi

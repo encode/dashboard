@@ -1,13 +1,13 @@
+import math
+
+import jinja2
+import typesystem
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse
-from starlette.routing import Router, Route, Mount, NoMatchFound
+from starlette.routing import Mount, NoMatchFound, Route, Router
 from starlette.templating import Jinja2Templates
-import math
-import typesystem
-import jinja2
-from . import ordering, pagination, search
-from .datasource import DataSource
 
+from . import ordering, pagination, search
 
 forms = typesystem.Jinja2Forms(directory="templates", package="dashboard")
 
@@ -26,9 +26,9 @@ class TableMount(Mount):
 
 class Dashboard:
     def __init__(self, tables):
-        self.routes = [Route("/", endpoint=self.index, name="index"),] + [
-            TableMount(table) for table in tables
-        ]
+        self.routes = [
+            Route("/", endpoint=self.index, name="index"),
+        ] + [TableMount(table) for table in tables]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory="templates")
         self.templates.env.loader = jinja2.ChoiceLoader(
@@ -91,7 +91,6 @@ class DashboardTable:
     async def table(self, request):
         template = "dashboard/table.html"
 
-        tablename = self.tablename
         datasource = self.datasource
 
         columns = {key: field.title for key, field in datasource.schema.fields.items()}
@@ -121,7 +120,9 @@ class DashboardTable:
 
         # Get pagination and column controls to render on the page
         column_controls = ordering.get_column_controls(
-            url=request.url, columns=columns, order_by=order_by,
+            url=request.url,
+            columns=columns,
+            order_by=order_by,
         )
         page_controls = pagination.get_page_controls(
             url=request.url, current_page=current_page, total_pages=total_pages

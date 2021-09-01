@@ -5,8 +5,10 @@ if [ -d 'venv' ] ; then
 else
     PREFIX=""
 fi
-PACKAGE="dashboard"
+SOURCE_FILES="dashboard tests"
 
 set -x
 
-${PREFIX}black ${PACKAGE} tests
+${PREFIX}autoflake --in-place --recursive ${SOURCE_FILES}
+${PREFIX}isort --project=dashboard ${SOURCE_FILES}
+${PREFIX}black ${SOURCE_FILES}

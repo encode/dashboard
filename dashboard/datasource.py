@@ -1,7 +1,6 @@
-import datetime
-import typesystem
 import typing
 
+import typesystem
 
 user = typesystem.Schema(
     fields={
@@ -137,7 +136,11 @@ class MockDataSource(DataSource):
         if self._order_by is not None:
             order_by = self._order_by.lstrip("-")
             reverse = self._order_by.startswith("-")
-            items = sorted(items, key=lambda item: item[order_by], reverse=reverse,)
+            items = sorted(
+                items,
+                key=lambda item: item[order_by],
+                reverse=reverse,
+            )
         if self._offset is not None:
             items = items[self._offset :]
         if self._limit is not None:

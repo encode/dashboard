@@ -1,6 +1,7 @@
-from dataclasses import dataclass
-from starlette.datastructures import URL, QueryParams
 import typing
+from dataclasses import dataclass
+
+from starlette.datastructures import URL, QueryParams
 
 
 @dataclass
@@ -28,7 +29,9 @@ def get_ordering(url: URL, columns: typing.Dict[str, str]) -> typing.Optional[st
 
 
 def get_column_controls(
-    url: URL, columns: typing.Dict[str, str], order_by: typing.Optional[str],
+    url: URL,
+    columns: typing.Dict[str, str],
+    order_by: typing.Optional[str],
 ) -> typing.List[ColumnControl]:
     selected_column = None if order_by is None else order_by.lstrip("-")
     is_reverse = order_by is not None and order_by.startswith("-")

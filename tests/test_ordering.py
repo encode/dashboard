@@ -1,10 +1,8 @@
-from dashboard.ordering import (
-    ColumnControl,
-    get_ordering,
-    get_column_controls,
-)
-from starlette.datastructures import URL
 from dataclasses import dataclass
+
+from starlette.datastructures import URL
+
+from dashboard.ordering import ColumnControl, get_column_controls, get_ordering
 
 
 def test_order_by_column():
@@ -41,7 +39,6 @@ class ExampleRecord:
 def test_get_column_controls_no_current_selection():
     columns = {"username": "Username", "email": "Email"}
     url = URL("/")
-    column, is_reverse = None, False
 
     controls = get_column_controls(url, columns, order_by=None)
 
@@ -66,7 +63,6 @@ def test_get_column_controls_no_current_selection():
 def test_get_column_controls_forward_current_selection():
     columns = {"username": "Username", "email": "Email"}
     url = URL("/?order=username")
-    column, is_reverse = "username", False
 
     controls = get_column_controls(url, columns, order_by="username")
 

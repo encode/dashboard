@@ -1,10 +1,12 @@
-import dashboard
-import typesystem
 import datetime
+
+import pytest
+import typesystem
 from starlette.applications import Starlette
 from starlette.routing import Mount
 from starlette.testclient import TestClient
-import pytest
+
+import dashboard
 
 
 @pytest.fixture
@@ -23,7 +25,11 @@ def app():
             }
         ),
         initial=[
-            {"username": f"user{i}@example.org", "is_admin": False,} for i in range(123)
+            {
+                "username": f"user{i}@example.org",
+                "is_admin": False,
+            }
+            for i in range(123)
         ],
     )
 
@@ -34,7 +40,11 @@ def app():
 
     return Starlette(
         routes=[
-            Mount("/admin", admin, name="dashboard",),
+            Mount(
+                "/admin",
+                admin,
+                name="dashboard",
+            ),
             Mount("/statics", ..., name="static"),
         ]
     )
