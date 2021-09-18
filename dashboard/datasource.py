@@ -2,6 +2,8 @@ import typing
 
 import typesystem
 
+from . import search
+
 user = typesystem.Schema(
     fields={
         "pk": typesystem.Integer(title="Identity", read_only=True),
@@ -37,39 +39,39 @@ def autoincrement():
 
 class DataSource:
     def search(self, search_term: str) -> "DataSource":
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     def filter(self, **filter: typing.Any) -> "DataSource":
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     def order_by(self, order_by: str) -> "DataSource":
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     def offset(self, offset: int) -> "DataSource":
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     def limit(self, limit: int) -> "DataSource":
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     async def count(self) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     async def all(self) -> typing.List["DataItem"]:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     async def get(self, **filter: typing.Any) -> typing.Optional["DataItem"]:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     async def create(self, **kwargs) -> "DataItem":
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
 
 class DataItem:
     async def delete(self):
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     async def update(self, **kwargs):
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
 
 class MockDataSource(DataSource):
@@ -133,6 +135,8 @@ class MockDataSource(DataSource):
         if self._filter_kwargs is not None:
             for key, value in self._filter_kwargs.items():
                 items = [item for item in items if item[key] == value]
+        if self._search_term is not None:
+            items = search.filter_by_search_term(items, self._search_term)
         if self._order_by is not None:
             order_by = self._order_by.lstrip("-")
             reverse = self._order_by.startswith("-")

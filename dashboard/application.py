@@ -169,7 +169,7 @@ class DashboardTable:
         if item is None:
             raise HTTPException(status_code=404)
 
-        form = forms.create_form(schema=datasource.schema, instance=item)
+        form = forms.create_form(schema=datasource.schema, values=item)
         if request.method == "POST":
             data = await request.form()
             form.validate(data)
