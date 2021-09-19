@@ -50,9 +50,9 @@ setup(
         'uvicorn',  # Not strictly true, but we'll have it here for now.
         'jinja2',
         'python-multipart',
-        'orm==0.2.0.dev1',  # Not strictly true, but we'll have it here for now.
-        'typesystem==0.3.0.dev0',
-        'databases[sqlite]',  # Not strictly true, but we'll have it here for now.
+        'orm~=0.2',
+        'typesystem~=0.3',
+        'databases[sqlite]~=0.5',  # Not strictly true, but we'll have it here for now.
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',

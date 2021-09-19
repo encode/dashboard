@@ -1,7 +1,6 @@
 from starlette.applications import Starlette
 from starlette.routing import Mount, Route
 from starlette.responses import RedirectResponse
-from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 import databases
 import dashboard

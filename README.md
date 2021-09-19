@@ -1,6 +1,6 @@
 An admin dashboard for use with ASGI web frameworks.
 
-Work in progress.
+**`dashboard` is still under development: We recommend pinning any dependencies with `dashboard~=0.1`**
 
 **example.py**
 
@@ -8,7 +8,6 @@ Work in progress.
 from starlette.applications import Starlette
 from starlette.routing import Mount, Route
 from starlette.responses import RedirectResponse
-from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 import databases
 import dashboard

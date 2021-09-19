@@ -1,6 +1,6 @@
 An admin dashboard for use with ASGI web frameworks.
 
-Work in progress.
+**`dashboard` is still under development: We recommend pinning any dependencies with `dashboard~=0.1`**
 
 **example.py**
 
@@ -8,7 +8,6 @@ Work in progress.
 from starlette.applications import Starlette
 from starlette.routing import Mount, Route
 from starlette.responses import RedirectResponse
-from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 import databases
 import dashboard
@@ -55,5 +54,6 @@ $ venv/bin/python
 >>> models.create_all()
 $ venv/bin/uvicorn example:app
 ```
+
 
 With many thanks to Eren Güven ([Twitter](https://twitter.com/cyberfart), [GitHub](https://github.com/eguven/)) for the `dashboard` PyPI package name.

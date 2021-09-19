@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from starlette.datastructures import URL
 
 from dashboard.ordering import ColumnControl, get_column_controls, get_ordering
@@ -24,16 +22,6 @@ def test_order_by_invalid_column():
     columns = {"name": "Name", "email": "Email"}
     ordering = get_ordering(url=url, columns=columns)
     assert ordering is None
-
-
-@dataclass
-class ExampleRecord:
-    pk: int
-    username: str
-    email: str
-
-    def __getitem__(self, item):
-        return getattr(self, item)
 
 
 def test_get_column_controls_no_current_selection():
