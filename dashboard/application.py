@@ -4,7 +4,7 @@ import jinja2
 import typesystem
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse
-from starlette.routing import Mount, NoMatchFound, Route, Router
+from starlette.routing import Mount, Route, Router
 from starlette.templating import Jinja2Templates
 
 from . import ordering, pagination, search
@@ -18,9 +18,7 @@ class TableMount(Mount):
         self.tablename = table.tablename
 
     def url_path_for(self, name: str, **path_params: str):
-        tablename = path_params.pop("tablename", None)
-        if tablename != self.tablename:
-            raise NoMatchFound()
+        path_params.pop("tablename", None)
         return super().url_path_for(name, **path_params)
 
 

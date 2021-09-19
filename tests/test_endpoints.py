@@ -62,6 +62,9 @@ def test_index(app):
 
 def test_table(app):
     client = TestClient(app=app)
+    response = client.get("/admin/example")
+    assert response.status_code == 404
+
     response = client.get("/admin/users")
     assert response.status_code == 200
     assert response.template.name == "dashboard/table.html"
