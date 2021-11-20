@@ -61,7 +61,9 @@ class DashboardTable:
     PAGE_SIZE = 10
     LOOKUP_FIELD = "pk"
 
-    def __init__(self, ident, title, datasource):
+    def __init__(
+        self, ident, title, datasource, can_create=True, can_edit=True, can_delete=True
+    ):
         self.routes = [
             Route("/", endpoint=self.table, name="table", methods=["GET", "POST"]),
             Route(
@@ -82,6 +84,9 @@ class DashboardTable:
         self.title = title
         self.tablename = ident
         self.datasource = datasource
+        self.can_create = can_create
+        self.can_edit = can_edit
+        self.can_delete = can_delete
 
     async def __call__(self, scope, receive, send) -> None:
         await self.router(scope, receive, send)
@@ -137,19 +142,15 @@ class DashboardTable:
         else:
             status_code = 200
 
-        context = {
-            "request": request,
-            "schema": datasource.schema,
-            "title": self.title,
-            "form": form,
-            "tablename": self.tablename,
-            "rows": rows,
-            "column_controls": column_controls,
-            "page_controls": page_controls,
-            "lookup_field": self.LOOKUP_FIELD,
-            "can_edit": True,
-            "search_term": search_term,
-        }
+        context = self._context(
+            form=form,
+            request=request,
+            rows=rows,
+            column_controls=column_controls,
+            page_controls=page_controls,
+            search_term=search_term,
+        )
+
         return self.templates.TemplateResponse(
             template, context, status_code=status_code
         )
@@ -157,7 +158,6 @@ class DashboardTable:
     async def detail(self, request):
         template = "dashboard/detail.html"
 
-        tablename = self.tablename
         datasource = self.datasource
 
         ident = request.path_params["ident"]
@@ -178,17 +178,8 @@ class DashboardTable:
         else:
             status_code = 200
 
-        # Render the page
-        context = {
-            "request": request,
-            "schema": datasource.schema,
-            "title": self.title,
-            "tablename": tablename,
-            "item": item,
-            "form": form,
-            "lookup_field": self.LOOKUP_FIELD,
-            "can_edit": True,
-        }
+        context = self._context(form=form, item=item, request=request)
+
         return self.templates.TemplateResponse(
             template, context, status_code=status_code
         )
@@ -208,3 +199,17 @@ class DashboardTable:
 
         url = request.url_for("dashboard:table", tablename=tablename)
         return RedirectResponse(url=url, status_code=303)
+
+    def _context(self, form, request, **kwargs):
+        base_context = {
+            "form": form,
+            "request": request,
+            "schema": self.datasource.schema,
+            "title": self.title,
+            "tablename": self.tablename,
+            "lookup_field": self.LOOKUP_FIELD,
+            "can_create": self.can_create,
+            "can_edit": self.can_edit,
+            "can_delete": self.can_delete,
+        }
+        return {**base_context, **kwargs}
