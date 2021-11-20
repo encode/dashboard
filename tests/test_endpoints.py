@@ -34,7 +34,10 @@ def app():
     )
 
     user_table = dashboard.DashboardTable(
-        ident="users", title="Users", datasource=users
+        ident="users",
+        title="Users",
+        datasource=users,
+        can_delete=False,
     )
     admin = dashboard.Dashboard(tables=[user_table])
 
@@ -70,6 +73,7 @@ def test_table(app):
     assert response.template.name == "dashboard/table.html"
     assert len(response.context["rows"]) == 10
     assert len(response.context["page_controls"]) == 10
+    assert response.text.count("New Row") == 1
 
     response = client.get("/admin/users?search=does-not-exist")
     assert response.status_code == 200
@@ -109,6 +113,8 @@ def test_detail(app):
     response = client.get("/admin/users/1")
     assert response.status_code == 200
     assert response.template.name == "dashboard/detail.html"
+    assert response.text.count("Edit Row") == 1
+    assert response.text.count("Delete Row") == 1  # Modal only
 
     response = client.get("/admin/users/1000")
     assert response.status_code == 404

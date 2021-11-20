@@ -5,33 +5,37 @@
   <div class="container">
     <div class="row pt-3">
       <div style="padding: 0 15px">
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
-          <li class="breadcrumb-item active"><a href="{{ url_for('dashboard:table', tablename=tablename) }}">{{ title }}</a></li>
-        </ol>
-      </nav>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active"><a href="{{ url_for('dashboard:table', tablename=tablename) }}">{{ title
+                }}</a></li>
+          </ol>
+        </nav>
       </div>
     </div>
 
     <div class="row">
       <div class="col-md-6">
         {% if rows %}
-          <form class="form-inline" target=".">
+        <form class="form-inline" target=".">
           <div class="input-group mb-3" style="width: 100%">
-            <input name="search" {% if search_term %}value="{{ search_term }}"{% endif %} type="search" class="form-control" aria-label="Search" aria-describedby="button-search">
+            <input name="search" {% if search_term %}value="{{ search_term }}" {% endif %} type="search"
+              class="form-control" aria-label="Search" aria-describedby="button-search">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="submit" id="button-search">Search</button>
             </div>
           </div>
-          </form>
-          {% endif %}
+        </form>
+        {% endif %}
       </div>
       <div class="col-md-6" style="height: 54px">
-        {% if can_edit %}
-          <div style="float: right">
-          <button class="btn btn-outline-primary" type="button" id="buttonNewRow" data-toggle="modal" data-target="#newRowModal"><span class="oi oi-plus" title="icon name" aria-hidden="true"></span> New Row</button>
-          </div>
+        {% if can_create %}
+        <div style="float: right">
+          <button class="btn btn-outline-primary" type="button" id="buttonNewRow" data-toggle="modal"
+            data-target="#newRowModal"><span class="oi oi-plus" title="icon name" aria-hidden="true"></span> New
+            Row</button>
+        </div>
         {% endif %}
       </div>
     </div>
@@ -62,68 +66,72 @@
   </div>
   -->
 
-      <div class="row">
-        <div class="col-md-12">
-          <table class="table dataset-list">
-            <thead>
-              <tr>
-                {% for control in column_controls %}
-                <th scope="col" {% if control.is_reverse_sorted %}class="dropup"{% endif %}>
-                  {% if control.url %}
-                    <a {% if control.is_sorted %}class="dropdown-toggle"{% endif %} href="{{ control.url }}">
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table dataset-list">
+          <thead>
+            <tr>
+              {% for control in column_controls %}
+              <th scope="col" {% if control.is_reverse_sorted %}class="dropup" {% endif %}>
+                {% if control.url %}
+                <a {% if control.is_sorted %}class="dropdown-toggle" {% endif %} href="{{ control.url }}">
                   {% endif %}
                   {{ control.text }}
                   {% if control.url %}
-                    </a>
-                  {% endif %}
-                </th>
-                {% endfor %}
-                <th style="width: 20px"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in rows %}
-              <tr>
-                {% for key in schema.fields.keys() %}
-                  <td>{{ item[key] }}</td>
-                {% endfor %}
-                <td><a href="{{ url_for('dashboard:detail', tablename=tablename, ident=item[lookup_field]) }}" class="oi oi-chevron-right" title="icon name" aria-hidden="true"></a></td>
-              </tr>
+                </a>
+                {% endif %}
+              </th>
               {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="row">
-        {% if page_controls %}
-        <div class="col">
-          <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
-              {% for control in page_controls %}
-              <li class="page-item {% if control.is_disabled %}disabled{% endif %} {% if control.is_active %}active{% endif %}"><a class="page-link" {% if control.url %}href="{{ control.url }}"{% endif %}>{{ control.text }}</a></li>
+              <th style="width: 20px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in rows %}
+            <tr>
+              {% for key in schema.fields.keys() %}
+              <td>{{ item[key] }}</td>
               {% endfor %}
-            </ul>
-          </nav>
-        </div>
-        {% endif %}
+              <td><a href="{{ url_for('dashboard:detail', tablename=tablename, ident=item[lookup_field]) }}"
+                  class="oi oi-chevron-right" title="icon name" aria-hidden="true"></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
+    </div>
+    <div class="row">
+      {% if page_controls %}
+      <div class="col">
+        <nav aria-label="Page navigation example">
+          <ul class="pagination justify-content-center">
+            {% for control in page_controls %}
+            <li
+              class="page-item {% if control.is_disabled %}disabled{% endif %} {% if control.is_active %}active{% endif %}">
+              <a class="page-link" {% if control.url %}href="{{ control.url }}" {% endif %}>{{ control.text }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+    </div>
     {% elif not table_has_columns %}
-      <div class="row pt-3">
-        <div class="col-md-12">
-          <div class="alert alert-warning" role="alert" style="text-align: center; padding: 30px;">
+    <div class="row pt-3">
+      <div class="col-md-12">
+        <div class="alert alert-warning" role="alert" style="text-align: center; padding: 30px;">
           <p><em>This table does not have any columns defined yet.</em></p>
           {% if can_edit %}<p><em>Upload a CSV file, or edit the columns and start adding data.</em></p>{% endif %}
-          </div>
         </div>
       </div>
-      {% elif not table_has_rows %}
-        <div class="row pt-3">
-          <div class="col-md-12">
-            <div class="alert alert-warning" role="alert" style="text-align: center; padding: 30px;">
-            <em>This table does not have any data yet.</em>
-            </div>
-          </div>
+    </div>
+    {% elif not table_has_rows %}
+    <div class="row pt-3">
+      <div class="col-md-12">
+        <div class="alert alert-warning" role="alert" style="text-align: center; padding: 30px;">
+          <em>This table does not have any data yet.</em>
         </div>
+      </div>
+    </div>
     {% endif %}
   </div>
 </main>
@@ -142,7 +150,8 @@
           {{ form }}
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-outline-primary"><span class="oi oi-check" title="icon name" aria-hidden="true"></span> Save Changes</button>
+          <button type="submit" class="btn btn-outline-primary"><span class="oi oi-check" title="icon name"
+              aria-hidden="true"></span> Save Changes</button>
         </div>
       </form>
     </div>
@@ -152,7 +161,7 @@
 
 {% block tail %}
 <script type="text/javascript">
-$("#uploadInput").fileinput({
+  $("#uploadInput").fileinput({
     msgPlaceholder: "Select a CSV file...",
     showUpload: false, // hide upload button
     showRemove: false, // hide remove button
@@ -160,9 +169,9 @@ $("#uploadInput").fileinput({
     browseOnZoneClick: true,
     overwriteInitial: true, // append files to initial preview
     initialPreviewAsData: true,
-}).on("filebatchselected", function(event, files) {
+  }).on("filebatchselected", function (event, files) {
     $("#uploadForm").submit();
-});
+  });
 </script>
 
 {% if form.errors %}

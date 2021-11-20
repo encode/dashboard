@@ -5,45 +5,57 @@
   <div class="container">
     <div class="row pt-3">
       <div style="padding: 0 15px">
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
-          <li class="breadcrumb-item"><a href="{{ url_for('dashboard:table', tablename=tablename) }}">{{ title }}</a></li>
-          <li class="breadcrumb-item active"><a href="{{ url_for('dashboard:detail', tablename=tablename, ident=item[lookup_field]) }}">{{ item[lookup_field] }}</a></li>
-        </ol>
-      </nav>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard:table', tablename=tablename) }}">{{ title }}</a>
+            </li>
+            <li class="breadcrumb-item active"><a
+                href="{{ url_for('dashboard:detail', tablename=tablename, ident=item[lookup_field]) }}">{{
+                item[lookup_field] }}</a></li>
+          </ol>
+        </nav>
       </div>
     </div>
 
-    {% if can_edit %}
+    {% if can_edit or can_delete %}
     <div class="row">
       <div class="col-md-12">
         <div style="float: right">
-        <button class="btn btn-outline-primary" type="button" id="button-addon2" data-toggle="modal" data-target="#editModal"><span class="oi oi-pencil" title="icon name" aria-hidden="true"></span> Edit Row</button>
-        <button class="btn btn-outline-danger" type="button" id="button-addon2" data-toggle="modal" data-target="#deleteModal"><span class="oi oi-x" title="icon name" aria-hidden="true"></span>
- Delete Row</button>
-      </div>
+          {% if can_edit %}
+          <button class="btn btn-outline-primary" type="button" id="button-addon2" data-toggle="modal"
+            data-target="#editModal"><span class="oi oi-pencil" title="icon name" aria-hidden="true"></span> Edit
+            Row</button>
+          {% endif %}
+          {% if can_delete %}
+          <button class="btn btn-outline-danger" type="button" id="button-addon2" data-toggle="modal"
+            data-target="#deleteModal"><span class="oi oi-x" title="icon name" aria-hidden="true"></span>
+            Delete Row</button>
+          {% endif %}
+        </div>
       </div>
     </div>
     {% endif %}
 
     <div class="row pt-3">
       <div class="col-md-12">
-          <table class="table dataset-detail">
-            <tbody>
-              {% for key, field in schema.fields.items() %}
-              <tr>
-                <th>{{ field.title }}</th><td>{{ item[key] }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <table class="table dataset-detail">
+          <tbody>
+            {% for key, field in schema.fields.items() %}
+            <tr>
+              <th>{{ field.title }}</th>
+              <td>{{ item[key] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </main>
 
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -57,14 +69,16 @@
       </div>
       <div class="modal-footer">
         <form action="{{ url_for('dashboard:delete', tablename=tablename, ident=item[lookup_field]) }}" method="POST">
-          <button type="submit" class="btn btn-outline-danger"><span class="oi oi-x" title="details" aria-hidden="true"></span> Confirm Delete</button>
+          <button type="submit" class="btn btn-outline-danger"><span class="oi oi-x" title="details"
+              aria-hidden="true"></span> Confirm Delete</button>
         </form>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -74,12 +88,13 @@
         </button>
       </div>
       <form action="{{ request.url }}" method="POST">
-      <div class="modal-body">
-        {{ form }}
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-outline-primary"><span class="oi oi-check" title="icon name" aria-hidden="true"></span> Save Changes</button>
-      </div>
+        <div class="modal-body">
+          {{ form }}
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-outline-primary"><span class="oi oi-check" title="icon name"
+              aria-hidden="true"></span> Save Changes</button>
+        </div>
       </form>
     </div>
   </div>
