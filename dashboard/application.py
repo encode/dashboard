@@ -227,9 +227,7 @@ class DashboardTable:
 
     async def _get_item(self, request):
         ident = request.path_params["ident"]
-        lookup = {self.LOOKUP_FIELD: ident}
-
-        item = await self.datasource.filter(**lookup).get()
+        item = await self.datasource.filter(self.LOOKUP_FIELD=ident).get()
         if item is None:
             raise HTTPException(status_code=404)
 
