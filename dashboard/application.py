@@ -18,7 +18,9 @@ class TableMount(Mount):
         self.tablename = table.tablename
 
     def url_path_for(self, name: str, **path_params: str):
-        path_params.pop("tablename", None)
+        tablename = path_params.pop("tablename", None)
+        if tablename:
+            name = tablename + "_" + name
         return super().url_path_for(name, **path_params)
 
 
@@ -65,12 +67,22 @@ class DashboardTable:
         self, ident, title, datasource, can_create=True, can_edit=True, can_delete=True
     ):
         self.routes = [
-            Route("/", endpoint=self.table, name="table", methods=["GET", "POST"]),
+            Route("/", endpoint=self.table, name=f"{ident}_table", methods=["GET"]),
+            Route("/", endpoint=self.create, name=f"{ident}_create", methods=["POST"]),
             Route(
-                "/{ident}", endpoint=self.detail, name="detail", methods=["GET", "POST"]
+                "/{ident}",
+                endpoint=self.detail,
+                name=f"{ident}_detail",
+                methods=["GET"],
             ),
             Route(
-                "/{ident}/delete", endpoint=self.delete, name="delete", methods=["POST"]
+                "/{ident}", endpoint=self.edit, name=f"{ident}_edit", methods=["POST"]
+            ),
+            Route(
+                "/{ident}/delete",
+                endpoint=self.delete,
+                name=f"{ident}_delete",
+                methods=["POST"],
             ),
         ]
         self.router = Router(routes=self.routes)
@@ -132,16 +144,6 @@ class DashboardTable:
         )
 
         form = forms.create_form(schema=datasource.schema)
-        if request.method == "POST":
-            data = await request.form()
-            form.validate(data)
-            if form.is_valid:
-                await datasource.create(**form.validated_data)
-                return RedirectResponse(url=request.url, status_code=303)
-            status_code = 400
-        else:
-            status_code = 200
-
         context = self._context(
             form=form,
             request=request,
@@ -151,53 +153,62 @@ class DashboardTable:
             search_term=search_term,
         )
 
-        return self.templates.TemplateResponse(
-            template, context, status_code=status_code
-        )
+        return self.templates.TemplateResponse(template, context, status_code=200)
+
+    async def create(self, request):
+        template = "dashboard/table.html"
+
+        if not self.can_create:
+            raise HTTPException(status_code=401)
+
+        form = forms.create_form(schema=self.datasource.schema)
+        data = await request.form()
+        form.validate(data)
+        if form.is_valid:
+            await self.datasource.create(**form.validated_data)
+            return RedirectResponse(url=request.url, status_code=303)
+
+        context = self._context(form=form, request=request)
+
+        return self.templates.TemplateResponse(template, context, status_code=400)
 
     async def detail(self, request):
         template = "dashboard/detail.html"
 
-        datasource = self.datasource
+        item = await self._get_item(request)
 
-        ident = request.path_params["ident"]
-
-        lookup = {self.LOOKUP_FIELD: ident}
-        item = await datasource.filter(**lookup).get()
-        if item is None:
-            raise HTTPException(status_code=404)
-
-        form = forms.create_form(schema=datasource.schema, values=item)
-        if request.method == "POST":
-            data = await request.form()
-            form.validate(data)
-            if form.is_valid:
-                await item.update(**form.validated_data)
-                return RedirectResponse(url=request.url, status_code=303)
-            status_code = 400
-        else:
-            status_code = 200
-
+        form = forms.create_form(schema=self.datasource.schema, values=item)
         context = self._context(form=form, item=item, request=request)
 
-        return self.templates.TemplateResponse(
-            template, context, status_code=status_code
-        )
+        return self.templates.TemplateResponse(template, context, status_code=200)
+
+    async def edit(self, request):
+        template = "dashboard/detail.html"
+
+        if not self.can_edit:
+            raise HTTPException(status_code=401)
+
+        item = await self._get_item(request)
+
+        form = forms.create_form(schema=self.datasource.schema, values=item)
+        data = await request.form()
+        form.validate(data)
+        if form.is_valid:
+            await item.update(**form.validated_data)
+            return RedirectResponse(url=request.url, status_code=303)
+
+        context = self._context(form=form, item=item, request=request)
+        return self.templates.TemplateResponse(template, context, status_code=400)
 
     async def delete(self, request):
-        tablename = self.tablename
-        datasource = self.datasource
+        if not self.can_delete:
+            raise HTTPException(status_code=401)
 
-        ident = request.path_params["ident"]
-
-        lookup = {self.LOOKUP_FIELD: ident}
-        item = await datasource.filter(**lookup).get()
-        if item is None:
-            raise HTTPException(status_code=404)
+        item = await self._get_item(request)
 
         await item.delete()
 
-        url = request.url_for("dashboard:table", tablename=tablename)
+        url = request.url_for("dashboard:table", tablename=self.tablename)
         return RedirectResponse(url=url, status_code=303)
 
     def _context(self, form, request, **kwargs):
@@ -213,3 +224,13 @@ class DashboardTable:
             "can_delete": self.can_delete,
         }
         return {**base_context, **kwargs}
+
+    async def _get_item(self, request):
+        ident = request.path_params["ident"]
+        lookup = {self.LOOKUP_FIELD: ident}
+
+        item = await self.datasource.filter(**lookup).get()
+        if item is None:
+            raise HTTPException(status_code=404)
+
+        return item
