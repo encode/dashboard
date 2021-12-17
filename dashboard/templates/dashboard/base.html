@@ -1,47 +1,49 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
 
-    <title>Starlette</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
 
-    <!-- Bootstrap core CSS -->
-    <link href="{{ url_for('static', path='/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', path='/css/bootstrap-fileinput.min.css') }}" rel="stylesheet">
+  <title>Starlette</title>
 
-    <!-- Iconic icons CSS -->
-    <link href="{{ url_for('static', path='/css/open-iconic-bootstrap.min.css') }}" rel="stylesheet">
+  <!-- Bootstrap core CSS -->
+  <link href="{{ url_for('static', path='/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', path='/css/bootstrap-fileinput.min.css') }}" rel="stylesheet">
 
-    <!-- Custom styles for the site -->
-    <link href="{{ url_for('static', path='/css/base.css') }}" rel="stylesheet">
+  <!-- Iconic icons CSS -->
+  <link href="{{ url_for('static', path='/css/open-iconic-bootstrap.min.css') }}" rel="stylesheet">
 
-  </head>
+  <!-- Custom styles for the site -->
+  <link href="{{ url_for('static', path='/css/base.css') }}" rel="stylesheet">
 
-  <body>
-    <nav class="navbar navbar-dark fixed-top bg-dark">
-      <div class="container">
-        <a class="navbar-brand" href="{{ url_for('dashboard:index') }}">Starlette</a>
-        <ul class="navbar-nav mr-auto"></ul>
-      </div>
-    </nav>
-    {% block content %}{% endblock %}
+</head>
 
-    <!-- <footer class="container">
+<body>
+  <nav class="navbar navbar-dark fixed-top bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('dashboard:index') }}">Starlette</a>
+      <ul class="navbar-nav mr-auto"></ul>
+    </div>
+  </nav>
+  {% block content %}{% endblock %}
+
+  <!-- <footer class="container">
       <p>&copy; Company 2017-2018</p>
     </footer> -->
 
-    <!-- Bootstrap core JavaScript
+  <!-- Bootstrap core JavaScript
     ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ url_for('static', path='/js/jquery-3.3.1.slim.min.js') }}"></script>
-    <script src="{{ url_for('static', path='/js/popper.min.js') }}"></script>
-    <script src="{{ url_for('static', path='/js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', path='/js/bootstrap-fileinput.min.js') }}"></script>
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="{{ url_for('static', path='/js/jquery-3.3.1.slim.min.js') }}"></script>
+  <script src="{{ url_for('static', path='/js/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', path='/js/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', path='/js/bootstrap-fileinput.min.js') }}"></script>
 
-    {% block tail %}{% endblock %}
+  {% block tail %}{% endblock %}
 
-  </body>
+</body>
+
 </html>
