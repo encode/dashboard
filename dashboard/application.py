@@ -4,8 +4,8 @@ import jinja2
 import typesystem
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse
-from starlette.staticfiles import StaticFiles
 from starlette.routing import Mount, Route, Router
+from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from . import ordering, pagination, search
