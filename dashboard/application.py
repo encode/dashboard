@@ -4,6 +4,7 @@ import jinja2
 import typesystem
 from starlette.exceptions import HTTPException
 from starlette.responses import RedirectResponse
+from starlette.staticfiles import StaticFiles
 from starlette.routing import Mount, Route, Router
 from starlette.templating import Jinja2Templates
 
@@ -26,8 +27,10 @@ class TableMount(Mount):
 
 class Dashboard:
     def __init__(self, tables):
+        statics = StaticFiles(packages=["dashboard"])
         self.routes = [
             Route("/", endpoint=self.index, name="index"),
+            Mount("/statics", app=statics, name="static"),
         ] + [TableMount(table) for table in tables]
         self.router = Router(routes=self.routes)
         self.templates = Jinja2Templates(directory="templates")

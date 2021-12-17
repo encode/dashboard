@@ -5,11 +5,11 @@
   <div class="container">
     <div class="row pt-3">
       <div style="padding: 0 15px">
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item active"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
-        </ol>
-      </nav>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="{{ url_for('dashboard:index') }}">Dashboard</a></li>
+          </ol>
+        </nav>
       </div>
     </div>
 
@@ -18,13 +18,15 @@
         <div class="row pt-3">
           <div class="col-md-12">
             {% if not rows %}
-              <p style="text-align: center; padding-top: 30px">You have not yet created any tables.</p>
+            <p style="text-align: center; padding-top: 30px">You have not yet created any tables.</p>
             {% else %}
-              <ul class="list-group">
-                {% for row in rows %}
-                  <li class="list-group-item d-flex justify-content-between align-items-center"><a href="{{ row.url }}">{{ row.text }}</a> <span class="badge badge-primary badge-pill">{{ "{:,}".format(row.count) }}</span></li>
-                {% endfor %}
-              </ul>
+            <ul class="list-group">
+              {% for row in rows %}
+              <li class="list-group-item d-flex justify-content-between align-items-center"><a href="{{ row.url }}">{{
+                  row.text }}</a> <span class="badge badge-primary badge-pill">{{ "{:,}".format(row.count) }}</span>
+              </li>
+              {% endfor %}
+            </ul>
             {% endif %}
           </div>
         </div>

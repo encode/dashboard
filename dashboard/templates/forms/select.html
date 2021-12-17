@@ -6,13 +6,13 @@
     <select class="form-control {% if error %}is-invalid{% endif %}" id="{{ field_id }}" name="{{ field_name }}">
         <option></option>
         {% for choice_value, choice_text in field.choices %}
-            <option value="{{ choice_value }}" {% if value == choice_value %}selected{% endif %}>{{ choice_text }}</option>
+        <option value="{{ choice_value }}" {% if value==choice_value %}selected{% endif %}>{{ choice_text }}</option>
         {% endfor %}
     </select>
 
     {% if error %}
-        <small class="invalid-feedback">{{ error }}</small>
+    <small class="invalid-feedback">{{ error }}</small>
     {% elif field.description %}
-        <small class="form-text text-muted">{{ field.description }}</small>
+    <small class="form-text text-muted">{{ field.description }}</small>
     {% endif %}
 </div>
