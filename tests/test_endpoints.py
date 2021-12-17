@@ -33,13 +33,33 @@ def app():
         ],
     )
 
+    products = dashboard.MockDataSource(
+        schema=typesystem.Schema(
+            fields={
+                "pk": typesystem.Integer(
+                    title="ID", read_only=True, default=dashboard.autoincrement()
+                ),
+                "name": typesystem.String(title="Name", max_length=100),
+            }
+        ),
+    )
+
     user_table = dashboard.DashboardTable(
         ident="users",
         title="Users",
         datasource=users,
-        can_delete=False,
     )
-    admin = dashboard.Dashboard(tables=[user_table])
+
+    products_table = dashboard.DashboardTable(
+        ident="products",
+        title="Products",
+        datasource=products,
+        can_create=False,
+        can_delete=False,
+        can_edit=False,
+    )
+
+    admin = dashboard.Dashboard(tables=[user_table, products_table])
 
     return Starlette(
         routes=[
@@ -59,7 +79,8 @@ def test_index(app):
     assert response.status_code == 200
     assert response.template.name == "dashboard/index.html"
     assert response.context["rows"] == [
-        {"text": "Users", "url": "http://testserver/admin/users/", "count": 100}
+        {"text": "Users", "url": "http://testserver/admin/users/", "count": 100},
+        {"text": "Products", "url": "http://testserver/admin/products/", "count": 0},
     ]
 
 
@@ -107,6 +128,9 @@ def test_create(app):
     assert response.status_code == 200
     assert response.url.endswith("/admin/users/")
 
+    response = client.post("/admin/products/")
+    assert response.status_code == 401
+
 
 def test_detail(app):
     client = TestClient(app=app)
@@ -114,7 +138,7 @@ def test_detail(app):
     assert response.status_code == 200
     assert response.template.name == "dashboard/detail.html"
     assert response.text.count("Edit Row") == 1
-    assert response.text.count("Delete Row") == 1  # Modal only
+    assert response.text.count("Delete Row") == 2  # With modal
 
     response = client.get("/admin/users/1000")
     assert response.status_code == 404
@@ -131,6 +155,9 @@ def test_update(app):
     assert response.status_code == 200
     assert response.url.endswith("/admin/users/1")
 
+    response = client.post("/admin/products/1")
+    assert response.status_code == 401
+
 
 def test_delete(app):
     client = TestClient(app=app)
@@ -140,3 +167,6 @@ def test_delete(app):
     response = client.post("/admin/users/1/delete", allow_redirects=True)
     assert response.status_code == 200
     assert response.url.endswith("/admin/users/")
+
+    response = client.post("/admin/products/1/delete")
+    assert response.status_code == 401
