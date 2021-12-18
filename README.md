@@ -8,7 +8,6 @@ An admin dashboard for use with ASGI web frameworks.
 from starlette.applications import Starlette
 from starlette.routing import Mount, Route
 from starlette.responses import RedirectResponse
-from starlette.staticfiles import StaticFiles
 import databases
 import dashboard
 import orm
@@ -17,7 +16,6 @@ import datetime
 
 database = databases.Database("sqlite:///test.db")
 models = orm.ModelRegistry(database=database)
-statics = StaticFiles(packages=["dashboard"])
 
 
 class Notes(orm.Model):
@@ -44,7 +42,6 @@ admin = dashboard.Dashboard(
 
 routes = [
     Mount("/admin", app=admin, name="dashboard"),
-    Mount("/statics", app=statics, name="static"),
     Route("/", endpoint=RedirectResponse(url="/admin")),
 ]
 

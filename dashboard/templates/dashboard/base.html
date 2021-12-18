@@ -10,14 +10,14 @@
   <title>Starlette</title>
 
   <!-- Bootstrap core CSS -->
-  <link href="{{ url_for('static', path='/css/bootstrap.min.css') }}" rel="stylesheet">
-  <link href="{{ url_for('static', path='/css/bootstrap-fileinput.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('dashboard:static', path='/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('dashboard:static', path='/css/bootstrap-fileinput.min.css') }}" rel="stylesheet">
 
   <!-- Iconic icons CSS -->
-  <link href="{{ url_for('static', path='/css/open-iconic-bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('dashboard:static', path='/css/open-iconic-bootstrap.min.css') }}" rel="stylesheet">
 
   <!-- Custom styles for the site -->
-  <link href="{{ url_for('static', path='/css/base.css') }}" rel="stylesheet">
+  <link href="{{ url_for('dashboard:static', path='/css/base.css') }}" rel="stylesheet">
 
 </head>
 
@@ -37,10 +37,10 @@
   <!-- Bootstrap core JavaScript
     ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
-  <script src="{{ url_for('static', path='/js/jquery-3.3.1.slim.min.js') }}"></script>
-  <script src="{{ url_for('static', path='/js/popper.min.js') }}"></script>
-  <script src="{{ url_for('static', path='/js/bootstrap.min.js') }}"></script>
-  <script src="{{ url_for('static', path='/js/bootstrap-fileinput.min.js') }}"></script>
+  <script src="{{ url_for('dashboard:static', path='/js/jquery-3.3.1.slim.min.js') }}"></script>
+  <script src="{{ url_for('dashboard:static', path='/js/popper.min.js') }}"></script>
+  <script src="{{ url_for('dashboard:static', path='/js/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('dashboard:static', path='/js/bootstrap-fileinput.min.js') }}"></script>
 
   {% block tail %}{% endblock %}
 
